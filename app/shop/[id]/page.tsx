@@ -1,5 +1,6 @@
 import { StarIcon } from '@heroicons/react/20/solid'
 import { notFound } from 'next/navigation'
+import { PrismaClient } from '@/lib/generated/prisma'
 import Navbar from '@/app/_components/Navbar'
 import AddToCartForm from '@/app/_components/AddToCartForm'
 
@@ -42,18 +43,25 @@ interface Product {
 
 async function getProduct(id: string): Promise<Product | null> {
   try {
-    const res = await fetch(`/api/products/${id}`, {
-      cache: 'no-store',
+    const prisma = new PrismaClient()
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: {
+        category: true,
+        images: true,
+        variants: {
+          include: {
+            images: true,
+          },
+        },
+      },
     })
-    if (!res.ok) {
-      console.error(`Failed to fetch product ${id}: ${res.status} ${res.statusText}`)
-      return null
-    }
-    const data = await res.json()
-    console.log(`Fetched product ${id}:`, data)
-    return data
+
+    if (!product) return null
+
+    return product as unknown as Product
   } catch (error) {
-    console.error('Error fetching product:', error)
+    console.error('Error fetching product from DB:', error)
     return null
   }
 }

@@ -1,6 +1,9 @@
-# TODO: Display Final Price in Bestsellers
+# Fix Individual Product Page
 
-## Steps to Complete
-- [x] Update BestSeller.tsx to calculate final price including tax (finalPrice = parseFloat(product.price) * (1 + product.taxRate / 100))
-- [x] Update the price display in the component to show the final price instead of base price
-- [x] Add taxRate to Product interface in BestSeller.tsx
+## Tasks
+- [x] Restructure layout to use proper sticky right panel without hacky padding
+- [x] Add state management for image selection
+- [x] Make thumbnails clickable to change main image
+- [x] Replace `<a>` with `Link` in breadcrumbs for client-side navigation
+- [x] Update price display to show base price and tax amount separately
+- [x] Separate server and client components to fix Next.js directive error
