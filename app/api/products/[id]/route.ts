@@ -41,7 +41,7 @@ export async function PUT(
   try {
     const { id: productId } = await params;
     const body = await request.json();
-    const { name, price, taxRate, description, categoryId, images, variants } = body;
+    const { name, price, mrp, taxRate, description, categoryId, images, variants } = body;
 
     // Validate categoryId
     if (!categoryId) {
@@ -83,6 +83,7 @@ export async function PUT(
       data: {
         name,
         price,
+        mrp: mrp ? parseFloat(mrp) : null,
         taxRate: parseFloat(taxRate) || 0,
         description,
         categoryId,

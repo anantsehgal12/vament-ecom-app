@@ -30,7 +30,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, price, taxRate, description, categoryId, images, variants } = body;
+    const { name, price, mrp, taxRate, description, categoryId, images, variants } = body;
 
     // Validate categoryId
     if (!categoryId) {
@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
         id,
         name,
         price,
+        mrp: mrp ? parseFloat(mrp) : null,
         taxRate: parseFloat(taxRate) || 0,
         description,
         categoryId,

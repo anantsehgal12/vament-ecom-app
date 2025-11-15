@@ -18,6 +18,7 @@ model Product {
   id          String       @id
   name        String
   price       String
+  mrp         Float?
   taxRate     Float        @default(0)
   description String
   categoryId  String

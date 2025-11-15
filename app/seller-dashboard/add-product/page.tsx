@@ -21,6 +21,7 @@ import { notFound } from "next/navigation"
 interface ProductFormData {
   name: string
   price: string
+  mrp: string
   taxRate: string
   stock: string
   description: string
@@ -30,6 +31,7 @@ interface ProductFormData {
 
 interface CalculatedFields {
   finalPrice: string
+  discount: string
 }
 
 export default function AddProductPage() {
@@ -38,6 +40,7 @@ export default function AddProductPage() {
   const [formData, setFormData] = useState<ProductFormData>({
     name: '',
     price: '',
+    mrp: '',
     taxRate: '',
     stock: '',
     description: '',
@@ -45,7 +48,8 @@ export default function AddProductPage() {
     variants: [{ name: '', images: [{ src: '', alt: '' }] }]
   })
   const [calculatedFields, setCalculatedFields] = useState<CalculatedFields>({
-    finalPrice: '0'
+    finalPrice: '0',
+    discount: '0'
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -71,11 +75,13 @@ export default function AddProductPage() {
 
   useEffect(() => {
     const price = parseFloat(formData.price) || 0
+    const mrp = parseFloat(formData.mrp) || 0
     const taxRate = parseFloat(formData.taxRate) || 0
     const taxAmount = (price * taxRate) / 100
     const finalPrice = price + taxAmount
-    setCalculatedFields({ finalPrice: finalPrice.toFixed(2) })
-  }, [formData.price, formData.taxRate])
+    const discount = mrp > 0 ? ((mrp - price) / mrp * 100).toFixed(2) : '0'
+    setCalculatedFields({ finalPrice: finalPrice.toFixed(2), discount })
+  }, [formData.price, formData.mrp, formData.taxRate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -91,6 +97,7 @@ export default function AddProductPage() {
         body: JSON.stringify({
           ...formData,
           stock: parseInt(formData.stock) || 0,
+          mrp: parseFloat(formData.mrp) || null,
           images: []
         }),
       })
@@ -231,7 +238,22 @@ export default function AddProductPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="price" className="text-sm font-semibold">Price</Label>
+                    <Label htmlFor="mrp" className="text-sm font-semibold">MRP (Maximum Retail Price)</Label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+                      <Input
+                        id="mrp"
+                        type="text"
+                        value={formData.mrp}
+                        onChange={(e) => setFormData(prev => ({ ...prev, mrp: e.target.value }))}
+                        placeholder="Enter MRP"
+                        className="pl-8"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="price" className="text-sm font-semibold">Selling Price</Label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
                       <Input
@@ -239,7 +261,7 @@ export default function AddProductPage() {
                         type="text"
                         value={formData.price}
                         onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                        placeholder="Enter price"
+                        placeholder="Enter selling price"
                         className="pl-8"
                         required
                       />
@@ -288,6 +310,20 @@ export default function AddProductPage() {
                         readOnly
                         className="pl-8"
                       />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="discount" className="text-sm font-semibold">Discount (%)</Label>
+                    <div className="relative">
+                      <Input
+                        id="discount"
+                        type="text"
+                        value={calculatedFields.discount}
+                        readOnly
+                        className="pr-8"
+                      />
+                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
                     </div>
                   </div>
 

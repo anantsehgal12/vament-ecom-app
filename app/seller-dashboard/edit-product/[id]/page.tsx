@@ -6,14 +6,13 @@ import { SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/app/_components/App-sidebar'
 import Header from '@/app/_components/Header'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Plus, Trash2 } from 'lucide-react'
+import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { isAdmin } from "@/app/extras/isAdmis"
 import { useUser } from "@clerk/nextjs";
 import { notFound } from "next/navigation"
@@ -21,6 +20,7 @@ import { notFound } from "next/navigation"
 interface ProductFormData {
   name: string
   price: string
+  mrp: string
   taxRate: string
   stock: string
   description: string
@@ -30,6 +30,7 @@ interface ProductFormData {
 
 interface CalculatedFields {
   finalPrice: string
+  discount: string
 }
 
 export default function EditProductPage() {
@@ -41,6 +42,7 @@ export default function EditProductPage() {
   const [formData, setFormData] = useState<ProductFormData>({
     name: '',
     price: '',
+    mrp: '',
     taxRate: '',
     stock: '',
     description: '',
@@ -48,7 +50,8 @@ export default function EditProductPage() {
     variants: [{ name: '', images: [{ src: '', alt: '' }] }]
   })
   const [calculatedFields, setCalculatedFields] = useState<CalculatedFields>({
-    finalPrice: '0'
+    finalPrice: '0',
+    discount: '0'
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -75,11 +78,13 @@ export default function EditProductPage() {
 
   useEffect(() => {
     const price = parseFloat(formData.price) || 0
+    const mrp = parseFloat(formData.mrp) || 0
     const taxRate = parseFloat(formData.taxRate) || 0
     const taxAmount = (price * taxRate) / 100
     const finalPrice = price + taxAmount
-    setCalculatedFields({ finalPrice: finalPrice.toFixed(2) })
-  }, [formData.price, formData.taxRate])
+    const discount = mrp > 0 ? ((mrp - price) / mrp * 100).toFixed(2) : '0'
+    setCalculatedFields({ finalPrice: finalPrice.toFixed(2), discount })
+  }, [formData.price, formData.mrp, formData.taxRate])
 
   const fetchProduct = async () => {
     try {
@@ -93,6 +98,7 @@ export default function EditProductPage() {
       setFormData({
         name: product.name,
         price: product.price,
+        mrp: product.mrp?.toString() || '',
         taxRate: product.taxRate?.toString() || '0',
         stock: product.stock?.toString() || '0',
         description: product.description,
@@ -103,12 +109,14 @@ export default function EditProductPage() {
         }))
       })
 
-      // Calculate final price
+      // Calculate final price and discount
       const price = parseFloat(product.price) || 0
+      const mrp = product.mrp || 0
       const taxRate = product.taxRate || 0
       const taxAmount = (price * taxRate) / 100
       const finalPrice = price + taxAmount
-      setCalculatedFields({ finalPrice: finalPrice.toFixed(2) })
+      const discount = mrp > 0 ? ((mrp - price) / mrp * 100).toFixed(2) : '0'
+      setCalculatedFields({ finalPrice: finalPrice.toFixed(2), discount })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -130,6 +138,7 @@ export default function EditProductPage() {
         body: JSON.stringify({
           ...formData,
           stock: parseInt(formData.stock) || 0,
+          mrp: parseFloat(formData.mrp) || null,
           images: []
         }),
       })
@@ -257,19 +266,18 @@ export default function EditProductPage() {
       <main className="w-full">
         <Header />
         <div className="container mx-auto p-6 max-w-4xl">
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-3xl font-bold text-center">Edit Product</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6">
-                  {error}
-                </div>
-              )}
+          <div className="flex gap-5 items-center mb-12">
+                      <Pencil/>
+                      <h1 className="text-3xl font-bold">Edit Product</h1>
+                    </div>
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6">
+              {error}
+            </div>
+          )}
 
-              <form onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }} className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <form onSubmit={handleSubmit} onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }} className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="name" className="text-sm font-semibold">Product Name</Label>
                     <Input
@@ -283,7 +291,22 @@ export default function EditProductPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="price" className="text-sm font-semibold">Price</Label>
+                    <Label htmlFor="mrp" className="text-sm font-semibold">MRP (Maximum Retail Price)</Label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+                      <Input
+                        id="mrp"
+                        type="text"
+                        value={formData.mrp}
+                        onChange={(e) => setFormData(prev => ({ ...prev, mrp: e.target.value }))}
+                        placeholder="Enter MRP"
+                        className="pl-8"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="price" className="text-sm font-semibold">Selling Price</Label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
                       <Input
@@ -291,7 +314,7 @@ export default function EditProductPage() {
                         type="text"
                         value={formData.price}
                         onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                        placeholder="Enter price"
+                        placeholder="Enter selling price"
                         className="pl-8"
                         required
                       />
@@ -340,6 +363,20 @@ export default function EditProductPage() {
                         readOnly
                         className="pl-8"
                       />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="discount" className="text-sm font-semibold">Discount (%)</Label>
+                    <div className="relative">
+                      <Input
+                        id="discount"
+                        type="text"
+                        value={calculatedFields.discount}
+                        readOnly
+                        className="pr-8"
+                      />
+                      <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
                     </div>
                   </div>
 
@@ -404,7 +441,7 @@ export default function EditProductPage() {
                 <div className="space-y-6">
                   <Label className="text-lg font-semibold">Variants</Label>
                   {formData.variants.map((variant, variantIndex) => (
-                    <Card key={variantIndex} className="p-4">
+                    <div key={variantIndex} className="p-4 border rounded-lg">
                       <div className="flex items-center justify-between mb-4">
                         <Label className="text-md font-medium">Variant {variantIndex + 1}</Label>
                         <Button
@@ -464,7 +501,7 @@ export default function EditProductPage() {
                           </Button>
                         </div>
                       </div>
-                    </Card>
+                    </div>
                   ))}
                   <Button
                     type="button"
@@ -495,8 +532,6 @@ export default function EditProductPage() {
                   </Button>
                 </div>
               </form>
-            </CardContent>
-          </Card>
         </div>
       </main>
     </SidebarProvider>

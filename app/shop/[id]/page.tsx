@@ -29,6 +29,7 @@ interface Product {
   id: string
   name: string
   price: string
+  mrp: number | null
   taxRate: number
   description: string
   stock: number
@@ -186,9 +187,21 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <div>
                 <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white md:text-3xl">{product.name}</h1>
 
-                <p className="mt-4 text-2xl md:text-3xl tracking-tight text-gray-200">
-                  ₹{(parseFloat(product.price) + (parseFloat(product.price) * product.taxRate / 100)).toFixed(2)}
-                </p>
+                <div className="mt-4">
+                  {product.mrp && product.mrp > parseFloat(product.price) && (
+                    <p className="text-lg text-gray-400 line-through">
+                      MRP: ₹{product.mrp.toFixed(2)}
+                    </p>
+                  )}
+                  <p className="text-2xl md:text-3xl tracking-tight text-gray-200">
+                    ₹{(parseFloat(product.price) + (parseFloat(product.price) * product.taxRate / 100)).toFixed(2)}
+                  </p>
+                  {product.mrp && product.mrp > parseFloat(product.price) && (
+                    <p className="text-lg text-green-400 font-semibold">
+                      {((product.mrp - parseFloat(product.price)) / product.mrp * 100).toFixed(0)}% off
+                    </p>
+                  )}
+                </div>
 
                 <div className="mt-2">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
