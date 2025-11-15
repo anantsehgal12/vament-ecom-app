@@ -42,7 +42,8 @@ interface Product {
 
 async function getProduct(id: string): Promise<Product | null> {
   try {
-    const res = await fetch(`/api/products/${id}`, {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://vamenterprises.co.in'
+    const res = await fetch(`${baseUrl}/api/products/${id}`, {
       cache: 'no-store',
     })
     if (!res.ok) {
