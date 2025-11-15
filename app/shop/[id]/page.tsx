@@ -42,14 +42,16 @@ interface Product {
 
 async function getProduct(id: string): Promise<Product | null> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://vamenterprises.co.in'
-    const res = await fetch(`${baseUrl}/api/products/${id}`, {
+    const res = await fetch(`/api/products/${id}`, {
       cache: 'no-store',
     })
     if (!res.ok) {
+      console.error(`Failed to fetch product ${id}: ${res.status} ${res.statusText}`)
       return null
     }
-    return res.json()
+    const data = await res.json()
+    console.log(`Fetched product ${id}:`, data)
+    return data
   } catch (error) {
     console.error('Error fetching product:', error)
     return null
