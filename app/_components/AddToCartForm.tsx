@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { toast } from 'sonner'
 
 interface Variant {
   id: number
@@ -19,7 +20,7 @@ export default function AddToCartForm({ productId, variants }: AddToCartFormProp
 
   const handleAddToCart = async () => {
     if (variants.length > 0 && selectedVariant === null) {
-      alert('Please select a variant before adding to cart.')
+      toast.error('Please select a variant before adding to cart.')
       return
     }
     setLoading(true)
@@ -37,14 +38,14 @@ export default function AddToCartForm({ productId, variants }: AddToCartFormProp
       })
 
       if (response.ok) {
-        alert('Item added to cart!')
+        toast.success('Item added to cart!')
       } else {
         const error = await response.json()
-        alert(`Error: ${error.error}`)
+        toast.error(`Error: ${error.error}`)
       }
     } catch (error) {
       console.error('Error adding to cart:', error)
-      alert('Failed to add item to cart')
+      toast.error('Failed to add item to cart')
     } finally {
       setLoading(false)
     }

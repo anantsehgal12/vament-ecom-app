@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { isAdmin } from "@/app/extras/isAdmis";
 import { notFound } from "next/navigation";
 import { Upload, FileText, Eye } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface OrderItem {
   id: string;
@@ -136,13 +137,13 @@ export default function SellerOrderDetailsPage() {
       if (response.ok) {
         const data = await response.json();
         setOrder({ ...order, invoiceUrl: data.invoiceUrl });
-        alert('Invoice uploaded successfully!');
+        toast.success('Invoice uploaded successfully!');
       } else {
-        alert('Failed to upload invoice');
+        toast.error('Failed to upload invoice');
       }
     } catch (error) {
       console.error('Error uploading invoice:', error);
-      alert('Error uploading invoice');
+      toast.error('Error uploading invoice');
     } finally {
       setUploading(false);
     }

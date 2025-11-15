@@ -4,6 +4,7 @@ import React from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "@/components/ui/sonner";
 import Lenis from "lenis"
 
 const geistSans = Geist({
@@ -46,6 +47,7 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased font-mono`}
         >
           {children}
+          <Toaster />
         </body>
       </html>
     </ClerkProvider>
