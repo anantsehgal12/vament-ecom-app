@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 // GET /api/addresses/[id] - Get a specific address
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -16,9 +16,11 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     const address = await prisma.address.findFirst({
       where: {
-        id: params.id,
+        id,
         userId
       }
     });
@@ -37,7 +39,7 @@ export async function GET(
 // PUT /api/addresses/[id] - Update an address
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -46,13 +48,15 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     const body = await request.json();
     const { name, fullName, contactNo, address, city, state, pincode, country, email, isDefault } = body;
 
     // Check if address exists and belongs to user
     const existingAddress = await prisma.address.findFirst({
       where: {
-        id: params.id,
+        id,
         userId
       }
     });
@@ -70,7 +74,7 @@ export async function PUT(
     }
 
     const updatedAddress = await prisma.address.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name,
         fullName,
@@ -100,7 +104,7 @@ export async function PUT(
 // DELETE /api/addresses/[id] - Delete an address
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -109,10 +113,12 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     // Check if address exists and belongs to user
     const existingAddress = await prisma.address.findFirst({
       where: {
-        id: params.id,
+        id,
         userId
       }
     });
@@ -122,7 +128,7 @@ export async function DELETE(
     }
 
     await prisma.address.delete({
-      where: { id: params.id }
+      where: { id }
     });
 
     return NextResponse.json({ message: 'Address deleted successfully' });
