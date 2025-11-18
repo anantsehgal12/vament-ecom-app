@@ -1,9 +1,10 @@
-# TODO: Add MRP Field and Discount Functionality
+# TODO: Add Saving and Saved Addresses Functionality
 
-- [x] Update `prisma/schema.prisma` to add `mrp Float` to Product model
-- [x] Run Prisma migration to apply schema changes
-- [x] Modify `app/seller-dashboard/add-product/page.tsx` to include MRP input field and calculate/display discount
-- [x] Modify `app/seller-dashboard/edit-product/[id]/page.tsx` to include MRP input field and calculate/display discount
-- [x] Update `app/shop/[id]/page.tsx` to display MRP, selling price, and discount %
-- [x] Update `app/api/products/route.ts` to handle MRP in POST requests
-- [x] Update `app/api/products/[id]/route.ts` to handle MRP in PUT request
+## Steps to Complete:
+- [x] Add Address model to Prisma schema
+- [x] Run Prisma migration and generate
+- [x] Create API routes for addresses (/api/addresses)
+- [x] Update checkout page to include saved addresses selection and save new address option with naming
+- [x] Add "My Addresses" to UserButton menu in Navbar
+- [x] Create /my-addresses page for managing addresses
+- [x] Test the functionality - App running on http://localhost:3001

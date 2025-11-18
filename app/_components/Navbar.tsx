@@ -14,6 +14,7 @@ import Image from "next/image";
 import {
   Building,
   ClipboardList,
+  MapPin,
   ShoppingBag,
   ShoppingCartIcon,
   UserCog,
@@ -110,6 +111,11 @@ function Navbar() {
                     label="My Orders"
                     labelIcon={<ClipboardList className="w-4 h-4" />}
                     onClick={() => (window.location.href = "/my-orders")}
+                  />
+                  <UserButton.Action
+                    label="My Addresses"
+                    labelIcon={<MapPin className="w-4 h-4" />}
+                    onClick={() => (window.location.href = "/my-addresses")}
                   />
                 </UserButton.MenuItems>
               </UserButton>

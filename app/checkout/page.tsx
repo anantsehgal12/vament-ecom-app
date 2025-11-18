@@ -56,6 +56,20 @@ interface CustomerDetails {
   email: string;
 }
 
+interface Address {
+  id: string;
+  name: string;
+  fullName: string;
+  contactNo: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  country: string;
+  email: string;
+  isDefault: boolean;
+}
+
 interface FeesSettings {
   standardDeliveryFee: number;
   freeDeliveryThreshold: number;
@@ -89,6 +103,11 @@ export default function CheckoutPage() {
     country: 'India',
     email: '',
   });
+  const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>('');
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [saveAddress, setSaveAddress] = useState(false);
+  const [addressName, setAddressName] = useState('');
   const [isTaxInfoOpen, setIsTaxInfoOpen] = useState(false);
   const [feesSettings, setFeesSettings] = useState<FeesSettings>({
     standardDeliveryFee: 0,
@@ -109,6 +128,7 @@ export default function CheckoutPage() {
       if (user) {
         await fetchCart();
         await fetchFeesSettings();
+        await fetchSavedAddresses();
         setLoading(false);
       }
     };
@@ -158,6 +178,33 @@ export default function CheckoutPage() {
         freeDeliveryThreshold: 500,
         freeDeliveryCoupon: false,
       });
+    }
+  };
+
+  const fetchSavedAddresses = async () => {
+    try {
+      const response = await fetch('/api/addresses');
+      if (response.ok) {
+        const addresses = await response.json();
+        setSavedAddresses(addresses);
+        // Auto-select default address if available
+        const defaultAddress = addresses.find((addr: Address) => addr.isDefault);
+        if (defaultAddress) {
+          setSelectedAddressId(defaultAddress.id);
+          setCustomerDetails({
+            fullName: defaultAddress.fullName,
+            contactNo: defaultAddress.contactNo,
+            address: defaultAddress.address,
+            city: defaultAddress.city,
+            state: defaultAddress.state,
+            pincode: defaultAddress.pincode,
+            country: defaultAddress.country,
+            email: defaultAddress.email,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching addresses:', error);
     }
   };
 
@@ -240,6 +287,60 @@ export default function CheckoutPage() {
     setAppliedCoupon(null);
     setCouponCode('');
     setCouponError('');
+  };
+
+  const handleAddressSelect = (address: Address) => {
+    setSelectedAddressId(address.id);
+    setCustomerDetails({
+      fullName: address.fullName,
+      contactNo: address.contactNo,
+      address: address.address,
+      city: address.city,
+      state: address.state,
+      pincode: address.pincode,
+      country: address.country,
+      email: address.email,
+    });
+    setShowAddressForm(false);
+  };
+
+  const handleSaveAddress = async () => {
+    if (!addressName.trim()) {
+      toast.error('Please enter an address name');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/addresses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: addressName.trim(),
+          fullName: customerDetails.fullName,
+          contactNo: customerDetails.contactNo,
+          address: customerDetails.address,
+          city: customerDetails.city,
+          state: customerDetails.state,
+          pincode: customerDetails.pincode,
+          country: customerDetails.country,
+          email: customerDetails.email,
+          isDefault: false, // Don't set as default when saving from checkout
+        }),
+      });
+
+      if (response.ok) {
+        await fetchSavedAddresses();
+        setSaveAddress(false);
+        setAddressName('');
+        toast.success('Address saved successfully');
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Failed to save address');
+      }
+    } catch (error) {
+      console.error('Error saving address:', error);
+      toast.error('Failed to save address');
+    }
   };
 
   const handlePayment = async () => {
@@ -387,9 +488,72 @@ export default function CheckoutPage() {
               {/* Left side - Form */}
               <div className="lg:col-span-2">
                 <form id="customerForm" onSubmit={(e) => { e.preventDefault(); handlePayment(); }}>
+                  {/* Saved Addresses Section */}
+                  {savedAddresses.length > 0 && (
+                    <Card className="bg-gray-900 border-gray-700 mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-white text-xl md:text-2xl font-bold">Select Delivery Address</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {savedAddresses.map((address) => (
+                            <div
+                              key={address.id}
+                              onClick={() => handleAddressSelect(address)}
+                              className={`p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                                selectedAddressId === address.id
+                                  ? 'border-blue-500 bg-blue-900/20'
+                                  : 'border-gray-600 bg-gray-800 hover:border-gray-500'
+                              }`}
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center mb-2">
+                                    <h4 className="text-white font-medium">{address.name}</h4>
+                                    {address.isDefault && (
+                                      <span className="ml-2 px-2 py-1 bg-yellow-500 text-black text-xs rounded-full">
+                                        Default
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-gray-300 text-sm space-y-1">
+                                    <div><strong>{address.fullName}</strong></div>
+                                    <div>{address.address}</div>
+                                    <div>{address.city}, {address.state} {address.pincode}</div>
+                                    <div>{address.contactNo}</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="flex justify-between items-center pt-4 border-t border-gray-700">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setShowAddressForm(!showAddressForm)}
+                            className="border-gray-600 text-white hover:bg-gray-700"
+                          >
+                            {showAddressForm ? 'Cancel' : '+ Add New Address'}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="link"
+                            onClick={() => router.push('/my-addresses')}
+                            className="text-blue-400 hover:text-blue-300"
+                          >
+                            Manage Addresses
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
                   <Card className="bg-gray-900 border-gray-700">
                     <CardHeader>
-                      <CardTitle className="text-white text-xl md:text-2xl font-bold">Customer Details</CardTitle>
+                      <CardTitle className="text-white text-xl md:text-2xl font-bold">
+                        {savedAddresses.length > 0 ? 'Delivery Details' : 'Customer Details'}
+                      </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4 md:space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -506,6 +670,48 @@ export default function CheckoutPage() {
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Save Address Section */}
+                {showAddressForm && (
+                  <Card className="bg-gray-900 border-gray-700 mt-6">
+                    <CardHeader>
+                      <CardTitle className="text-white text-xl font-bold">Save This Address</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="addressName" className="text-white text-sm font-medium">Address Name *</Label>
+                        <Input
+                          id="addressName"
+                          type="text"
+                          placeholder="e.g., Home, Office, Work"
+                          value={addressName}
+                          onChange={(e) => setAddressName(e.target.value)}
+                          className="bg-gray-800 border-gray-600 text-white focus:border-gray-500 focus:ring-0"
+                          required
+                        />
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="saveAddress"
+                          checked={saveAddress}
+                          onChange={(e) => setSaveAddress(e.target.checked)}
+                          className="rounded border-gray-600"
+                        />
+                        <Label htmlFor="saveAddress" className="text-white text-sm">Save this address for future use</Label>
+                      </div>
+                      {saveAddress && (
+                        <Button
+                          type="button"
+                          onClick={handleSaveAddress}
+                          className="w-full rounded-xl"
+                        >
+                          Save Address
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
                 </form>
               </div>
 
