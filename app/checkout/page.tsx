@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/app/_components/Navbar';
@@ -489,12 +490,12 @@ export default function CheckoutPage() {
               <div className="lg:col-span-2">
                 <form id="customerForm" onSubmit={(e) => { e.preventDefault(); handlePayment(); }}>
                   {/* Saved Addresses Section */}
-                  {savedAddresses.length > 0 && (
-                    <Card className="bg-gray-900 border-gray-700 mb-6">
-                      <CardHeader>
-                        <CardTitle className="text-white text-xl md:text-2xl font-bold">Select Delivery Address</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
+                  <Card className="bg-gray-900 border-gray-700 mb-6">
+                    <CardHeader>
+                      <CardTitle className="text-white text-xl md:text-2xl font-bold">Select Delivery Address</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {savedAddresses.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {savedAddresses.map((address) => (
                             <div
@@ -527,27 +528,39 @@ export default function CheckoutPage() {
                             </div>
                           ))}
                         </div>
-                        <div className="flex justify-between items-center pt-4 border-t border-gray-700">
+                      ) : (
+                        <div className="text-center py-8">
+                          <p className="text-gray-400 mb-4">No address found</p>
                           <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setShowAddressForm(!showAddressForm)}
-                            className="border-gray-600 text-white hover:bg-gray-700"
+                            onClick={() => setShowAddressForm(true)}
+                            className="rounded-3xl"
                           >
-                            {showAddressForm ? 'Cancel' : '+ Add New Address'}
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="link"
-                            onClick={() => router.push('/my-addresses')}
-                            className="text-blue-400 hover:text-blue-300"
-                          >
-                            Manage Addresses
+                            Add Your First Address
                           </Button>
                         </div>
-                      </CardContent>
-                    </Card>
-                  )}
+                      )}
+                      <div className="flex justify-between items-center pt-4 border-t border-gray-700">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setShowAddressForm(!showAddressForm)}
+                          className="border-gray-600 text-white hover:bg-gray-700"
+                        >
+                          {showAddressForm ? 'Cancel' : '+ Add New Address'}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="link"
+                          onClick={() => router.push('/my-addresses')}
+                          className="text-blue-400 hover:text-blue-300"
+                        >
+                          <Link href="/my-addresses">
+                            Manage Addresses
+                          </Link>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
 
                   <Card className="bg-gray-900 border-gray-700">
                     <CardHeader>
