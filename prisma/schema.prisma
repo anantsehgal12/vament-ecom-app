@@ -23,6 +23,7 @@ model Product {
   description String
   categoryId  String
   stock       Int          @default(0)
+  isLive      Boolean      @default(true)
   createdAt   DateTime     @default(now())
   category    Category     @relation(fields: [categoryId], references: [id])
   images      Image[]

@@ -3,9 +3,15 @@ import { PrismaClient } from '@/lib/generated/prisma';
 
 const prisma = new PrismaClient();
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const all = searchParams.get('all') === 'true';
+
     const products = await prisma.product.findMany({
+      where: all ? {} : {
+        isLive: true,
+      },
       orderBy: {
         createdAt: 'desc',
       },
@@ -30,7 +36,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, price, mrp, taxRate, description, categoryId, images, variants } = body;
+    const { name, price, mrp, taxRate, description, categoryId, images, variants, isLive } = body;
 
     // Validate categoryId
     if (!categoryId) {
@@ -58,6 +64,7 @@ export async function POST(request: NextRequest) {
         taxRate: parseFloat(taxRate) || 0,
         description,
         categoryId,
+        isLive: isLive !== undefined ? isLive : true,
         images: {
           create: images.map((image: any) => ({
             src: image.src,

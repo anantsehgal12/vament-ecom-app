@@ -79,7 +79,7 @@ export default function SearchPage() {
     try {
       // Fetch products, categories, orders, coupons, and notifications
       const [productsRes, categoriesRes, ordersRes, couponsRes, notificationsRes] = await Promise.all([
-        fetch('/api/products'),
+        fetch('/api/products?all=true'),
         fetch('/api/categories'),
         fetch('/api/orders'),
         fetch('/api/coupons'),

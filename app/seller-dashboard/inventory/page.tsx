@@ -44,7 +44,7 @@ export default function InventoryPage() {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('/api/products')
+      const response = await fetch('/api/products?all=true')
       if (!response.ok) {
         throw new Error('Failed to fetch products')
       }

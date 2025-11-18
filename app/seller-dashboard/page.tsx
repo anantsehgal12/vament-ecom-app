@@ -52,7 +52,7 @@ export default function SellerDashboardPage() {
     try {
       const [ordersRes, productsRes, categoriesRes] = await Promise.all([
         fetch("/api/orders?seller=true"),
-        fetch("/api/products"),
+        fetch("/api/products?all=true"),
         fetch("/api/categories")
       ]);
 

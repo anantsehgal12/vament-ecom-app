@@ -41,7 +41,7 @@ export async function PUT(
   try {
     const { id: productId } = await params;
     const body = await request.json();
-    const { name, price, mrp, taxRate, description, categoryId, images, variants } = body;
+    const { name, price, mrp, taxRate, description, categoryId, images, variants, isLive } = body;
 
     // Validate categoryId
     if (!categoryId) {
@@ -87,6 +87,7 @@ export async function PUT(
         taxRate: parseFloat(taxRate) || 0,
         description,
         categoryId,
+        isLive: isLive !== undefined ? isLive : undefined,
         images: {
           create: images.map((image: any) => ({
             src: image.src,
@@ -130,20 +131,44 @@ export async function PATCH(
   try {
     const { id: productId } = await params;
     const body = await request.json();
-    const { stock } = body;
+    const { stock, isLive } = body;
 
-    if (typeof stock !== 'number' || stock < 0) {
+    if (stock !== undefined && (typeof stock !== 'number' || stock < 0)) {
       return NextResponse.json({ error: 'Invalid stock value' }, { status: 400 });
+    }
+
+    if (isLive !== undefined && typeof isLive !== 'boolean') {
+      return NextResponse.json({ error: 'Invalid isLive value' }, { status: 400 });
     }
 
     const oldProduct = await prisma.product.findUnique({
       where: { id: productId },
-      select: { stock: true, name: true },
+      select: { stock: true, name: true, isLive: true },
     });
+
+    const updateData: any = {};
+    if (stock !== undefined) updateData.stock = stock;
+    if (isLive !== undefined) updateData.isLive = isLive;
+
+    // If stock is being set to 0, automatically set isLive to false
+    if (stock === 0) {
+      updateData.isLive = false;
+    }
+
+    // If trying to set isLive to true but stock is 0, prevent it
+    if (isLive === true) {
+      const currentProduct = await prisma.product.findUnique({
+        where: { id: productId },
+        select: { stock: true },
+      });
+      if (currentProduct && currentProduct.stock === 0) {
+        return NextResponse.json({ error: 'Cannot set product to live when stock is 0' }, { status: 400 });
+      }
+    }
 
     const product = await prisma.product.update({
       where: { id: productId },
-      data: { stock },
+      data: updateData,
       include: {
         category: true,
         variants: {
@@ -156,19 +181,33 @@ export async function PATCH(
     });
 
     // Create notification for stock update
-    if (oldProduct && oldProduct.stock !== stock) {
+    if (oldProduct && stock !== undefined && oldProduct.stock !== stock) {
+      let message = `Stock updated for ${product.name}: ${oldProduct.stock} → ${stock}`;
+      if (stock === 0) {
+        message += ' (Product automatically set to not live due to zero stock)';
+      }
       await prisma.notification.create({
         data: {
-          message: `Stock updated for ${product.name}: ${oldProduct.stock} → ${stock}`,
+          message,
           type: 'STOCK_UPDATE',
+        },
+      });
+    }
+
+    // Create notification for live status update
+    if (oldProduct && isLive !== undefined && oldProduct.isLive !== isLive) {
+      await prisma.notification.create({
+        data: {
+          message: `${product.name} is now ${isLive ? 'live' : 'not live'}`,
+          type: 'GENERAL',
         },
       });
     }
 
     return NextResponse.json(product);
   } catch (error) {
-    console.error('Error updating product stock:', error);
-    return NextResponse.json({ error: 'Failed to update product stock' }, { status: 500 });
+    console.error('Error updating product:', error);
+    return NextResponse.json({ error: 'Failed to update product' }, { status: 500 });
   }
 }
 

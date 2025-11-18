@@ -11,11 +11,13 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
 import { Edit, Trash2, Plus, Search, Inbox } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
 import { isAdmin } from "@/app/extras/isAdmis"
 import { useUser } from "@clerk/nextjs";
 import { notFound } from "next/navigation"
 import Navbar from '@/app/_components/Navbar'
 import Link from 'next/link'
+import { toast } from 'sonner'
 
 interface Product {
   id: string
@@ -23,6 +25,7 @@ interface Product {
   price: string
   taxRate: number
   description: string
+  isLive: boolean
   category: { id: string; name: string }
   variants: { name?: string; images: { src: string; alt: string }[] }[]
 }
@@ -41,7 +44,7 @@ export default function ProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('/api/products')
+      const response = await fetch('/api/products?all=true')
       if (!response.ok) {
         throw new Error('Failed to fetch products')
       }
@@ -70,6 +73,38 @@ export default function ProductsPage() {
 
   const handleEdit = (productId: string) => {
     router.push(`/seller-dashboard/edit-product/${productId}`)
+  }
+
+  const handleToggleLive = async (productId: string, newIsLive: boolean) => {
+    try {
+      const response = await fetch(`/api/products/${productId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isLive: newIsLive }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        if (errorData.error === 'Cannot set product to live when stock is 0') {
+          const product = products.find(p => p.id === productId)
+          if (product) {
+            toast.error(`Due to zero stock, the product "${product.name}" cannot be set to live.`)
+          }
+        } else {
+          throw new Error(errorData.error || 'Failed to update product live status')
+        }
+        return
+      }
+
+      const updatedProduct = await response.json()
+      setProducts(products.map(product =>
+        product.id === productId ? updatedProduct : product
+      ))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+    }
   }
 
   const filteredProducts = products.filter(product =>
@@ -169,6 +204,7 @@ export default function ProductsPage() {
                       <TableHead>Total Price</TableHead>
                       <TableHead>Description</TableHead>
                       <TableHead>Category</TableHead>
+                      <TableHead>Live</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -185,6 +221,13 @@ export default function ProductsPage() {
                           <TableCell className="text-green-600 font-bold">₹{totalPrice.toFixed(2)}</TableCell>
                           <TableCell className="text-sm text-gray-600 max-w-xs truncate">{product.description}</TableCell>
                           <TableCell className="text-sm text-gray-600">{product.category.name}</TableCell>
+                          <TableCell>
+                            <Switch
+                              checked={product.isLive}
+                              onCheckedChange={(checked) => handleToggleLive(product.id, checked)}
+                              aria-label={`Toggle ${product.name} live status`}
+                            />
+                          </TableCell>
                           <TableCell>
                             <div className="flex space-x-2">
                               <Button
@@ -264,8 +307,24 @@ export default function ProductsPage() {
                         <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
                           {product.category.name}
                         </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-gray-500">Live:</span>
+                          <Switch
+                            checked={product.isLive}
+                            onCheckedChange={(checked) => handleToggleLive(product.id, checked)}
+                            aria-label={`Toggle ${product.name} live status`}
+                          />
+                        </div>
                       </div>
                       <div className="flex gap-2">
+                        <div className="flex items-center gap-2 flex-1">
+                          <span className="text-xs text-gray-500">Live:</span>
+                          <Switch
+                            checked={product.isLive}
+                            onCheckedChange={(checked) => handleToggleLive(product.id, checked)}
+                            aria-label={`Toggle ${product.name} live status`}
+                          />
+                        </div>
                         <Button
                           variant="outline"
                           size="sm"
