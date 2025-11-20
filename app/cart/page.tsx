@@ -19,6 +19,7 @@ interface CartItem {
     id: string;
     name: string;
     price: string;
+    mrp?: string;
     taxRate: number;
     category: { name: string };
     variants: {
@@ -233,11 +234,18 @@ export default function CartPage() {
                                   Variant: {item.variant.name}
                                 </p>
                               )}
-                              <p className="text-base md:text-lg font-semibold text-white mt-1">
-                                ₹{(
-                                  parseFloat(item.product.price.replace(/[^\d.]/g, '')) + (parseFloat(item.product.price.replace(/[^\d.]/g, '')) * item.product.taxRate / 100)
-                                ).toFixed(2)}
-                              </p>
+                              <div className="mt-1">
+                                <p className="text-base md:text-lg font-semibold text-white">
+                                  ₹{Math.round(
+                                    parseFloat(item.product.price.replace(/[^\d.]/g, '')) + (parseFloat(item.product.price.replace(/[^\d.]/g, '')) * item.product.taxRate / 100)
+                                  ).toString()}
+                                </p>
+                                {item.product.mrp && (
+                                  <p className="text-sm text-gray-400 line-through">
+                                    MRP: ₹{Math.round(parseFloat(item.product.mrp)).toString()}
+                                  </p>
+                                )}
+                              </div>
                             </div>
 
                             {/* Quantity Controls */}

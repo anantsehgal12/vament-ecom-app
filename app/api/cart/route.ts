@@ -20,7 +20,12 @@ export async function GET() {
         items: {
           include: {
             product: {
-              include: {
+              select: {
+                id: true,
+                name: true,
+                price: true,
+                mrp: true,
+                taxRate: true,
                 category: true,
                 variants: {
                   include: {
@@ -45,16 +50,21 @@ export async function GET() {
         include: {
           items: {
             include: {
-              product: {
-                include: {
-                  category: true,
-                  variants: {
-                    include: {
-                      images: true,
-                    },
+            product: {
+              select: {
+                id: true,
+                name: true,
+                price: true,
+                mrp: true,
+                taxRate: true,
+                category: true,
+                variants: {
+                  include: {
+                    images: true,
                   },
                 },
               },
+            },
               variant: {
                 include: {
                   images: true,

@@ -94,7 +94,7 @@ export default function ShopPage() {
                   </h3>
                   <p className="mt-1 text-xs md:text-sm text-gray-500">{product.description.slice(0, 50)}...</p>
                 </div>
-                <p className="text-sm md:text-base font-medium text-white">₹{(parseFloat(product.price) + (parseFloat(product.price) * product.taxRate / 100)).toFixed(2)}</p>
+                <p className="text-sm md:text-base font-medium text-white">₹{Math.round(parseFloat(product.price) + (parseFloat(product.price) * product.taxRate / 100)).toString()}</p>
               </div>
             </div>
           ))}

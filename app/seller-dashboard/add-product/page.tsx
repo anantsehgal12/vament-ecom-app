@@ -80,7 +80,7 @@ export default function AddProductPage() {
     const taxAmount = (price * taxRate) / 100
     const finalPrice = price + taxAmount
     const discount = mrp > 0 ? ((mrp - price) / mrp * 100).toFixed(2) : '0'
-    setCalculatedFields({ finalPrice: finalPrice.toFixed(2), discount })
+    setCalculatedFields({ finalPrice: Math.round(finalPrice).toString(), discount })
   }, [formData.price, formData.mrp, formData.taxRate])
 
   const handleSubmit = async (e: React.FormEvent) => {
