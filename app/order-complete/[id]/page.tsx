@@ -107,16 +107,16 @@ export default function OrderCompletePage() {
       });
 
       if (response.ok) {
-        toast.success('Order cancelled successfully');
+        toast.success('Order cancelled successfully', { style: { fontSize: '18px' } });
         setSelectedOrder(null);
         setCancelReason('');
         setCancelDescription('');
         fetchOrder(); // Refresh order
       } else {
-        toast.error('Failed to cancel order');
+        toast.error('Failed to cancel order', { style: { fontSize: '18px' } });
       }
     } catch (error) {
-      toast.error('Error cancelling order');
+      toast.error('Error cancelling order', { style: { fontSize: '18px' } });
     } finally {
       setIsCancelling(false);
     }
