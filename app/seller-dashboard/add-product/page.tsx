@@ -1,4 +1,4 @@
-'use client'
+ 'use client'
 
 import { CirclePlus } from 'lucide-react'
 import { useState, useEffect } from 'react'
@@ -98,7 +98,9 @@ export default function AddProductPage() {
           ...formData,
           stock: parseInt(formData.stock) || 0,
           mrp: parseFloat(formData.mrp) || null,
-          images: []
+          images: formData.variants.flatMap(variant => variant.images),
+          variants: formData.variants
+          
         }),
       })
 
@@ -214,6 +216,7 @@ export default function AddProductPage() {
           <div className="flex gap-5 items-center mb-12">
             <CirclePlus/>
             <h1 className="text-3xl font-bold">Add New Product</h1>
+          </div>
           </div>
 
           {error && (
@@ -470,7 +473,6 @@ export default function AddProductPage() {
             {loading ? 'Adding Product...' : 'Add Product'}
           </Button>
           </form>
-        </div>
       </main>
     </SidebarProvider>
   )

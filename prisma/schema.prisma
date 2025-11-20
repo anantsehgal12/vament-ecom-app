@@ -107,6 +107,8 @@ model Order {
   country     String?
   email       String?
   invoiceUrl  String?
+  cancelReason String?
+  cancelDescription String?
   items       OrderItem[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt

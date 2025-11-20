@@ -7,6 +7,9 @@ import Navbar from '@/app/_components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 
 interface OrderItem {
   id: string;
@@ -47,6 +50,11 @@ export default function OrdersPage() {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelDescription, setCancelDescription] = useState('');
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     if (isLoaded && !user) {
@@ -73,6 +81,43 @@ export default function OrdersPage() {
     }
   };
 
+  const handleCancelOrder = async () => {
+    if (!selectedOrder || !cancelReason) return;
+
+    setCancelling(true);
+    try {
+      const response = await fetch(`/api/orders/${selectedOrder.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cancelReason,
+          cancelDescription
+        })
+      });
+
+      if (response.ok) {
+        setCancelDialogOpen(false);
+        setCancelReason('');
+        setCancelDescription('');
+        setSelectedOrder(null);
+        fetchOrders(); // Refresh orders
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to cancel order');
+      }
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      alert('Failed to cancel order');
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  const openCancelDialog = (order: Order) => {
+    setSelectedOrder(order);
+    setCancelDialogOpen(true);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'pending':
@@ -89,6 +134,14 @@ export default function OrdersPage() {
         return 'bg-gray-600';
     }
   };
+
+  const cancelReasons = [
+    { value: 'changed_mind', label: 'Changed my mind' },
+    { value: 'wrong_item', label: 'Wrong item ordered' },
+    { value: 'better_price', label: 'Found better price elsewhere' },
+    { value: 'delivery_delay', label: 'Delivery delay' },
+    { value: 'other', label: 'Other' }
+  ];
 
   if (!isLoaded || loading) {
     return (
@@ -181,13 +234,24 @@ export default function OrdersPage() {
                     </div>
                     <div className="mt-4 pt-4 border-t border-gray-600">
                       <div className="flex justify-between items-center">
-                        <Button
-                          onClick={() => router.push(`/order-complete/${order.id}`)}
-                          variant="outline"
-                          className="border-gray-600 text-white hover:bg-gray-700"
-                        >
-                          View Order Details
-                        </Button>
+                        <div className="flex space-x-2">
+                          <Button
+                            onClick={() => router.push(`/order-complete/${order.id}`)}
+                            variant="outline"
+                            className="border-gray-600 text-white hover:bg-gray-700"
+                          >
+                            View Order Details
+                          </Button>
+                          {order.status !== 'SHIPPED' && order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && (
+                            <Button
+                              onClick={() => openCancelDialog(order)}
+                              variant="destructive"
+                              size="sm"
+                            >
+                              Cancel Order
+                            </Button>
+                          )}
+                        </div>
                         {order.invoiceUrl && (
                           <Button
                             onClick={() => window.open(order.invoiceUrl, '_blank')}
@@ -207,6 +271,57 @@ export default function OrdersPage() {
           )}
         </div>
       </div>
+
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent className="bg-gray-800 text-white border-gray-700">
+          <DialogHeader>
+            <DialogTitle>Cancel Order</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Reason for Cancellation</label>
+              <Select value={cancelReason} onValueChange={setCancelReason}>
+                <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                  <SelectValue placeholder="Select a reason" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-700 border-gray-600">
+                  {cancelReasons.map((reason) => (
+                    <SelectItem key={reason.value} value={reason.value}>
+                      {reason.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Additional Description (Optional)</label>
+              <Textarea
+                value={cancelDescription}
+                onChange={(e) => setCancelDescription(e.target.value)}
+                placeholder="Provide more details..."
+                className="bg-gray-700 border-gray-600 text-white"
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setCancelDialogOpen(false)}
+              className="border-gray-600 text-white hover:bg-gray-700"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCancelOrder}
+              disabled={!cancelReason || cancelling}
+              variant="destructive"
+            >
+              {cancelling ? 'Cancelling...' : 'Confirm Cancellation'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

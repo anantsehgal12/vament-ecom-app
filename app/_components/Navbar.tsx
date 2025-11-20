@@ -70,7 +70,7 @@ function Navbar() {
                 </Link>
               </li>
               <li className="hover:underline">
-                <Link href="" className="inline-flex items-center gap-2">
+                <Link href="/about-us" className="inline-flex items-center gap-2">
                   <Building />
                   About Us
                 </Link>

@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Trash2, Minus, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { motion } from 'framer-motion';
 
 interface CartItem {
   id: string;
@@ -193,13 +194,14 @@ export default function CartPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
               {/* Left side - Cart Items */}
               <div className="lg:col-span-2">
-                <div className="space-y-4">
-                  {cart.items.map((item) => {
+                <motion.div className="space-y-4" initial="hidden" animate="visible" variants={{hidden:{opacity:0}, visible:{opacity:1, transition:{staggerChildren:0.1}}}}>
+                  {cart.items.map((item, index) => {
                     const image = getItemImage(item);
                     const isUpdating = updatingItems.has(item.id);
 
                     return (
-                      <Card key={item.id} className="overflow-hidden bg-gray-800 border-gray-700">
+                      <motion.div key={item.id} variants={{hidden:{opacity:0, y:20}, visible:{opacity:1, y:0}}}>
+                      <Card className="overflow-hidden bg-gray-800 border-gray-700">
                         <CardContent className="p-4 md:p-6">
                           <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4">
                             {/* Product Image */}
@@ -288,6 +290,7 @@ export default function CartPage() {
                           </div>
                         </CardContent>
                       </Card>
+                      </motion.div>
                     );
                   })}
                 </div>

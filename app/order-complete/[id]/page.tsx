@@ -7,6 +7,12 @@ import Navbar from '@/app/_components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 interface OrderItem {
   id: string;
@@ -40,6 +46,8 @@ interface Order {
   invoiceUrl?: string;
   items: OrderItem[];
   createdAt: string;
+  cancelReason?: string;
+  cancelDescription?: string;
 }
 
 export default function OrderCompletePage() {
@@ -48,6 +56,10 @@ export default function OrderCompletePage() {
   const params = useParams();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelDescription, setCancelDescription] = useState('');
+  const [isCancelling, setIsCancelling] = useState(false);
 
   useEffect(() => {
     if (isLoaded && !user) {
@@ -74,6 +86,39 @@ export default function OrderCompletePage() {
       router.push('/my-orders');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    if (!selectedOrder || !cancelReason) return;
+
+    setIsCancelling(true);
+    try {
+      const response = await fetch(`/api/orders/${selectedOrder.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: 'CANCELLED',
+          cancelReason,
+          cancelDescription,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success('Order cancelled successfully');
+        setSelectedOrder(null);
+        setCancelReason('');
+        setCancelDescription('');
+        fetchOrder(); // Refresh order
+      } else {
+        toast.error('Failed to cancel order');
+      }
+    } catch (error) {
+      toast.error('Error cancelling order');
+    } finally {
+      setIsCancelling(false);
     }
   };
 
@@ -162,8 +207,14 @@ export default function OrderCompletePage() {
                     <div className="flex-shrink-0">
                       {item.variant?.images?.[0] ? (
                         <img
-                          src={item.variant.images[0].src}
+                          src={item.variant.images[0].src.startsWith('/') ? item.variant.images[0].src : `/${item.variant.images[0].src}`}
                           alt={item.variant.images[0].alt}
+                          className="w-16 h-16 object-cover rounded"
+                        />
+                      ) : item.product.variants?.[0]?.images?.[0] ? (
+                        <img
+                          src={item.product.variants[0].images[0].src}
+                          alt={item.product.variants[0].images[0].alt}
                           className="w-16 h-16 object-cover rounded"
                         />
                       ) : (
@@ -190,6 +241,75 @@ export default function OrderCompletePage() {
           </Card>
 
           <div className="flex justify-center space-x-4 mt-8">
+            {order.status === 'PENDING' || order.status === 'CONFIRMED' && (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    onClick={() => setSelectedOrder(order)}
+                  >
+                    Cancel Order
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Cancel Order</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="reason">Reason for cancellation</Label>
+                      <Select value={cancelReason} onValueChange={setCancelReason}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a reason" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="changed-mind">Changed my mind</SelectItem>
+                          <SelectItem value="wrong-item">Ordered wrong item</SelectItem>
+                          <SelectItem value="delivery-delay">Delivery delay</SelectItem>
+                          <SelectItem value="found-better-price">Found better price</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="description">Additional description (optional)</Label>
+                      <Textarea
+                        id="description"
+                        value={cancelDescription}
+                        onChange={(e) => setCancelDescription(e.target.value)}
+                        placeholder="Provide more details..."
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedOrder(null);
+                          setCancelReason('');
+                          setCancelDescription('');
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={handleCancelOrder}
+                        disabled={!cancelReason || isCancelling}
+                      >
+                        {isCancelling ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                            Cancelling...
+                          </>
+                        ) : (
+                          'Confirm Cancellation'
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
             <Button
               onClick={() => router.push('/my-orders')}
               variant="outline"

@@ -1,9 +1,22 @@
-# TODO: Update Checkout Page for No Address Handling
+# TODO: Implement Framer Motion Across Website (Excluding Seller Dashboard)
 
-## Completed Tasks
-- [x] Modified the "Select Delivery Address" section in `app/checkout/page.tsx` to always display the card
-- [x] Added conditional rendering: if savedAddresses.length > 0, show the address grid; else show "No address found" message and "Add Your First Address" button
-- [x] Ensured the "Add Your First Address" button sets showAddressForm to true to open the address form
+## Components to Update
+- [x] Navbar.tsx: Add motion to header, logo, menu items (stagger), buttons
+- [x] Footer.tsx: Add motion to footer container, links, logo
+- [ ] BottomNav.tsx: Add motion to nav container and items (stagger)
 
-## Summary
-The checkout page now handles the case where there are no saved addresses by displaying a message "No address found" and providing a prominent button to "Add Your First Address" within the "Select Delivery Address" box.
+## Pages to Update
+- [x] shop/page.tsx: Add motion to title and product grid (stagger on products)
+- [x] cart/page.tsx: Add motion to cart items (stagger), summary card
+- [x] about-us/page.tsx: Add motion to main container
+- [x] checkout/page.tsx: Add motion to checkout form and steps
+- [ ] my-orders/page.tsx: Add motion to orders list
+- [ ] my-addresses/page.tsx: Add motion to addresses list
+- [ ] order-complete/[id]/page.tsx: Add motion to completion message
+- [ ] shop/[id]/page.tsx: Add motion to product details
+
+## Notes
+- Use fade-in, slide-up animations for containers
+- Use stagger for lists/items
+- Ensure animations trigger on scroll where appropriate (whileInView)
+- Exclude all files under app/seller-dashboard/

@@ -475,7 +475,7 @@ export default function CheckoutPage() {
       <Navbar />
       <div className="min-h-screen py-6 md:py-8">
         <div className="container mx-auto px-4">
-          <h1 className="text-2xl md:text-3xl font-bold text-white mb-6 md:mb-8 ml-0 md:ml-5">Checkout</h1>
+          <motion.h1 className="text-2xl md:text-3xl font-bold text-white mb-6 md:mb-8 ml-0 md:ml-5" initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} transition={{duration:0.5}}>Checkout</motion.h1>
 
           {!cart?.items || cart.items.length === 0 ? (
             <div className="text-center py-12">
@@ -485,7 +485,7 @@ export default function CheckoutPage() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+            <motion.div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8" initial={{opacity:0}} animate={{opacity:1}} transition={{duration:0.5, delay:0.2}}>
               {/* Left side - Form */}
               <div className="lg:col-span-2">
                 <form id="customerForm" onSubmit={(e) => { e.preventDefault(); handlePayment(); }}>
@@ -849,7 +849,7 @@ export default function CheckoutPage() {
                   </CardContent>
                 </Card>
               </div>
-            </div>
+            </motion.div>
           )}
         </div>
       </div>

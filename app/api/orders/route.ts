@@ -101,6 +101,12 @@ export async function POST(request: NextRequest) {
             product: {
               include: {
                 category: true,
+                images: true,
+                variants: {
+                  include: {
+                    images: true,
+                  },
+                },
               },
             },
             variant: {
@@ -186,6 +192,12 @@ export async function GET(request: NextRequest) {
               product: {
                 include: {
                   category: true,
+                  images: true,
+                  variants: {
+                    include: {
+                      images: true,
+                    },
+                  },
                 },
               },
               variant: {
@@ -210,6 +222,12 @@ export async function GET(request: NextRequest) {
               product: {
                 include: {
                   category: true,
+                  images: true,
+                  variants: {
+                    include: {
+                      images: true,
+                    },
+                  },
                 },
               },
               variant: {
