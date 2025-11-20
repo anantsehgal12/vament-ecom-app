@@ -182,7 +182,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           </div>
 
           {/* Right: Details + fixed add to cart (col-span 5) */}
-          <div className="lg:top-24 lg:w-[42rem] lg:right-8 lg:max-h-[100vh] lg:overflow-auto">
+          <div className="lg:top-24 lg:w-[42rem] lg:right-8 lg:pr-8 lg:overflow-auto">
             {/* Keep column space; whole right column fixed on large screens */}
             <div>
                 <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white md:text-3xl">{product.name}</h1>
@@ -216,7 +216,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 </div>
 
                 <div className="mt-6">
-                  <p className="text-base text-gray-200">{product.description}</p>
+                  <p className="text-base text-gray-200" style={{ whiteSpace: 'pre-wrap' }}>{product.description}</p>
                 </div>
 
                 <AddToCartForm productId={product.id} variants={product.variants ?? []} />
