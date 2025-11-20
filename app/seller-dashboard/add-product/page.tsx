@@ -217,7 +217,6 @@ export default function AddProductPage() {
             <CirclePlus/>
             <h1 className="text-3xl font-bold">Add New Product</h1>
           </div>
-          </div>
 
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6">
@@ -473,6 +472,7 @@ export default function AddProductPage() {
             {loading ? 'Adding Product...' : 'Add Product'}
           </Button>
           </form>
+        </div>
       </main>
     </SidebarProvider>
   )
