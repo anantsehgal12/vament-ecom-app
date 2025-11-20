@@ -286,9 +286,9 @@ export default function CartPage() {
                             {/* Subtotal and Remove Button */}
                             <div className="flex flex-row md:flex-col items-center justify-between w-full md:w-auto md:items-end space-x-4 md:space-x-0 md:space-y-2">
                               <p className="text-base md:text-lg font-semibold text-white">
-                                ₹{(
+                                ₹{Math.round(
                                   (parseFloat(item.product.price.replace(/[^\d.]/g, '')) + (parseFloat(item.product.price.replace(/[^\d.]/g, '')) * item.product.taxRate / 100)) * item.quantity
-                                ).toFixed(2)}
+                                )}
                               </p>
                               <Button
                                 variant="ghost"
@@ -331,7 +331,7 @@ export default function CartPage() {
                       </div>
                       <div className="flex justify-between text-lg md:text-xl font-bold text-white border-t pt-2">
                         <span>Total:</span>
-                        <span>₹{calculateTotal().toFixed(2)}</span>
+                        <span>₹{Math.round(calculateTotal())}</span>
                       </div>
                       <div className="flex-col space-y-4 space-x-4 pt-4">
                         <Button

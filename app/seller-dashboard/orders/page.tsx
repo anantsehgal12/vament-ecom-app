@@ -259,7 +259,7 @@ export default function SellerOrdersPage() {
                           <div className="text-right">
                             <p className="text-gray-600 text-sm">Total Amount</p>
                             <p className="text-xl font-bold text-green-600">
-                              ₹{order.totalAmount.toFixed(2)}
+                              ₹{Math.round(order.totalAmount)}
                             </p>
                             <div className="mt-2 space-y-2">
                               <Select
@@ -333,7 +333,7 @@ export default function SellerOrdersPage() {
                               <div className="text-right">
                                 <p>Qty: {item.quantity}</p>
                                 <p className="font-medium">
-                                  ₹{(item.price * item.quantity).toFixed(2)}
+                                  ₹{Math.round(item.price * item.quantity)}
                                 </p>
                               </div>
                             </div>
@@ -383,7 +383,7 @@ export default function SellerOrdersPage() {
                           </div>
                           <div className="text-right">
                             <p className="text-lg font-bold text-green-600">
-                              ₹{order.totalAmount.toFixed(2)}
+                              ₹{Math.round(order.totalAmount)}
                             </p>
                           </div>
                         </div>

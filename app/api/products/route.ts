@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, price, mrp, taxRate, description, categoryId, images, variants, isLive } = body;
+    const { name, price, mrp, taxRate, description, categoryId, images, variants, isLive, stock } = body;
 
     // Validate categoryId
     if (!categoryId) {
@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
         taxRate: parseFloat(taxRate) || 0,
         description,
         categoryId,
+        stock: parseInt(stock) || 0,
         isLive: isLive !== undefined ? isLive : true,
         images: {
           create: images.map((image: any) => ({

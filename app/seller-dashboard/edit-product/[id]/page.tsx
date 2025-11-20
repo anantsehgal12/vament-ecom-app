@@ -22,7 +22,7 @@ interface ProductFormData {
   price: string
   mrp: string
   taxRate: string
-  stock: string
+
   description: string
   categoryId: string
   variants: { name?: string; images: { src: string; alt: string }[] }[]
@@ -44,7 +44,7 @@ export default function EditProductPage() {
     price: '',
     mrp: '',
     taxRate: '',
-    stock: '',
+
     description: '',
     categoryId: '',
     variants: [{ name: '', images: [{ src: '', alt: '' }] }]
@@ -83,7 +83,7 @@ export default function EditProductPage() {
     const taxAmount = (price * taxRate) / 100
     const finalPrice = price + taxAmount
     const discount = mrp > 0 ? ((mrp - price) / mrp * 100).toFixed(2) : '0'
-    setCalculatedFields({ finalPrice: finalPrice.toFixed(2), discount })
+    setCalculatedFields({ finalPrice: Math.round(finalPrice).toString(), discount })
   }, [formData.price, formData.mrp, formData.taxRate])
 
   const fetchProduct = async () => {
@@ -100,7 +100,7 @@ export default function EditProductPage() {
         price: product.price,
         mrp: product.mrp?.toString() || '',
         taxRate: product.taxRate?.toString() || '0',
-        stock: product.stock?.toString() || '0',
+
         description: product.description,
         categoryId: product.categoryId,
         variants: product.variants.map((variant: any) => ({
@@ -137,7 +137,7 @@ export default function EditProductPage() {
         },
         body: JSON.stringify({
           ...formData,
-          stock: parseInt(formData.stock) || 0,
+
           mrp: parseFloat(formData.mrp) || null,
           images: []
         }),
@@ -339,18 +339,7 @@ export default function EditProductPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="stock" className="text-sm font-semibold">Stock Quantity</Label>
-                    <Input
-                      id="stock"
-                      type="number"
-                      value={formData.stock}
-                      onChange={(e) => setFormData(prev => ({ ...prev, stock: e.target.value }))}
-                      placeholder="Enter stock quantity"
-                      min="0"
-                      required
-                    />
-                  </div>
+
 
                   <div className="space-y-2">
                     <Label htmlFor="finalPrice" className="text-sm font-semibold">Final Price (incl. tax)</Label>

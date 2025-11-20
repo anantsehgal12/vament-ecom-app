@@ -194,7 +194,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                     </p>
                   )}
                   <p className="text-2xl md:text-3xl tracking-tight text-gray-200">
-                    ₹{(parseFloat(product.price) + (parseFloat(product.price) * product.taxRate / 100)).toFixed(2)}
+                    ₹{Math.round(parseFloat(product.price) + (parseFloat(product.price) * product.taxRate / 100)).toString()}
                   </p>
                   {product.mrp && product.mrp > parseFloat(product.price) && (
                     <p className="text-lg text-green-400 font-semibold">

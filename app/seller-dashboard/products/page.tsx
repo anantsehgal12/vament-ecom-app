@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
-import { Edit, Trash2, Plus, Search, Inbox } from 'lucide-react'
+import { Edit, Trash2, Plus, Search, Inbox, ExternalLink } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { isAdmin } from "@/app/extras/isAdmis"
 import { useUser } from "@clerk/nextjs";
@@ -217,9 +217,9 @@ export default function ProductsPage() {
                       return (
                         <TableRow key={product.id}>
                           <TableCell className="font-medium">{product.name}</TableCell>
-                          <TableCell className="text-green-600 font-bold">₹{price.toFixed(2)}</TableCell>
-                          <TableCell className="text-green-600 font-bold">₹{totalPrice.toFixed(2)}</TableCell>
-                          <TableCell className="text-sm text-gray-600 max-w-xs truncate">{product.description}</TableCell>
+                          <TableCell className="text-green-600 font-bold">₹{Math.round(price)}</TableCell>
+                          <TableCell className="text-green-600 font-bold">₹{Math.round(totalPrice)}</TableCell>
+                          <TableCell className="text-sm text-gray-600">{product.description.length > 10 ? `${product.description.substring(0, 10)}....` : product.description}</TableCell>
                           <TableCell className="text-sm text-gray-600">{product.category.name}</TableCell>
                           <TableCell>
                             <Switch
@@ -230,6 +230,12 @@ export default function ProductsPage() {
                           </TableCell>
                           <TableCell>
                             <div className="flex space-x-2">
+                              <Button asChild variant="outline" size="sm">
+                                <Link href={`/shop/${product.id}`}>
+                                  <ExternalLink />
+                                  View
+                                </Link>
+                              </Button>
                               <Button
                                 variant="outline"
                                 size="sm"
