@@ -1,8 +1,8 @@
-import { StarIcon } from '@heroicons/react/20/solid'
 import { notFound } from 'next/navigation'
 import { PrismaClient } from '@/lib/generated/prisma'
 import Navbar from '@/app/_components/Navbar'
 import AddToCartForm from '@/app/_components/AddToCartForm'
+import { ProductGallery } from '@/app/_components/ProductGallery'
 
 const reviews = { href: '#', average: 4 }
 
@@ -74,6 +74,10 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   if (!product || product.stock === 0) {
     notFound()
+  }
+
+  if (!product) {
+    return null // This shouldn't happen due to notFound(), but for TypeScript
   }
 
   // Use images from product or variants
@@ -156,29 +160,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   <div className="mx-auto mt-6 max-w-7xl px-4 sm:px-6 lg:px-8 lg:grid lg:grid-cols-12 lg:gap-x-20 lg:pr-[30rem]">
           {/* Left: Gallery (col-span 7) */}
           <div className="lg:col-span-7">
-            <div className="w-full">
-              {/* Main image */}
-              <div className="aspect-w-4 aspect-h-5 w-full overflow-hidden rounded-lg bg-gray-800">
-                {images[0] ? (
-                  <img
-                    src={images[0].src}
-                    alt={images[0].alt ?? product.name}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center text-gray-400">No image</div>
-                )}
-              </div>
-
-              {/* Thumbnails */}
-              <div className="mt-4 grid grid-cols-4 gap-4">
-                {images.slice(0, 8).map((img) => (
-                  <button key={img.id} className="overflow-hidden rounded-md bg-gray-700 hover:ring-2 focus:outline-none">
-                    <img src={img.src} alt={img.alt ?? product.name} className="h-20 w-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            </div>
+            <ProductGallery images={images} productName={product.name} />
           </div>
 
           {/* Right: Details + fixed add to cart (col-span 5) */}
