@@ -216,7 +216,7 @@ export default function ProductsPage() {
 
                       return (
                         <TableRow key={product.id}>
-                          <TableCell className="font-medium">{product.name}</TableCell>
+                          <TableCell className="font-medium">{product.name.length > 10 ? `${product.name.substring(0, 10)}....` : product.name}</TableCell>
                           <TableCell className="text-green-600 font-bold">₹{Math.round(price)}</TableCell>
                           <TableCell className="text-green-600 font-bold">₹{Math.round(totalPrice)}</TableCell>
                           <TableCell className="text-sm text-gray-600">{product.description.length > 10 ? `${product.description.substring(0, 10)}....` : product.description}</TableCell>
