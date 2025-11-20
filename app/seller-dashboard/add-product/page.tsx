@@ -108,7 +108,7 @@ export default function AddProductPage() {
         throw new Error('Failed to add product')
       }
 
-      router.push('/shop')
+      router.push('/seller-dashboard/products')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
