@@ -1,12 +1,9 @@
 'use client';
 
-import { notFound, useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import Navbar from '@/app/_components/Navbar';
 import AddToCartForm from '@/app/_components/AddToCartForm';
 import { ProductGallery } from '@/app/_components/ProductGallery';
-import { Metadata } from 'next';
-import ProductClientPage from '@/app/_components/ProductClientPage';
+import Navbar from '@/app/_components/Navbar';
+import Link from 'next/link';
 
 interface Product {
   id: string;
@@ -16,7 +13,7 @@ interface Product {
   taxRate: number;
   description: string;
   stock: number;
-  category: { id:string; name: string };
+  category: { id: string; name: string };
   variants: {
     id: number;
     name: string | null;
@@ -25,94 +22,7 @@ interface Product {
   images: { id: number; src: string; alt: string }[];
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const productId = params.id;
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${productId}`);
-
-  if (!res.ok) {
-    return {
-      title: "Product Not Found",
-      description: "The product you are looking for does not exist.",
-    };
-  }
-
-  const product: Product = await res.json();
-
-  if (!product) {
-    return {
-      title: "Product Not Found",
-      description: "The product you are looking for does not exist.",
-    };
-  }
-
-  return {
-    title: `${product.name} - VAM Enterprises`,
-    description: product.description,
-    keywords: [product.name, product.category.name, "VAM Enterprises", "premium gifts", "luxury gifts"],
-  };
-}
-
-export async function ProductPage({ params }: { params: { id: string } }) {
-  const productId = params.id;
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${productId}`);
-
-  if (!res.ok) {
-      notFound();
-  }
-  const product: Product = await res.json();
-
-  if (!product || product.stock === 0) {
-    notFound();
-  }
-
-  return <ProductClientPage product={product} />;
-}
-
-export default function ProductDetailPage() {
-  const params = useParams();
-  const productId = params.id as string;
-
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!productId) return;
-
-    async function getProduct() {
-      try {
-        const res = await fetch(`/api/products/${productId}`);
-        if (!res.ok) {
-          notFound();
-        }
-        const data = await res.json();
-        setProduct(data);
-      } catch (error) {
-        console.error('Error fetching product:', error);
-        notFound();
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    getProduct();
-  }, [productId]);
-
-  if (loading) {
-    return (
-        <div>
-          <Navbar />
-          <div className="min-h-screen flex items-center justify-center text-white">
-            Loading...
-          </div>
-        </div>
- 
-    );
-  }
-
-  if (!product || product.stock === 0) {
-    notFound();
-  }
-
+export default function ProductClientPage({ product }: { product: Product }) {
   const images = product.images && product.images.length > 0
     ? product.images
     : product.variants && product.variants.length > 0 && product.variants[0].images
@@ -126,7 +36,7 @@ export default function ProductDetailPage() {
     "description": product.description,
     "offers": {
       "@type": "Offer",
-      "price": product.price.replace(/[^\d.]/g, ''),
+      "price": product.price.replace(/[^\\d.]/g, ''),
       "priceCurrency": "INR",
       "availability": "https://schema.org/InStock"
     },

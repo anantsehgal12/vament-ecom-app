@@ -4,7 +4,6 @@ import BestSeller from './_components/BestSeller';
 import About from './_components/About';
 import Footer from './_components/Footer';
 import BottomNav from "./_components/BottomNav";
-import { useRouter } from "next/navigation";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -13,8 +12,6 @@ export const metadata: Metadata = {
   keywords: "gifting solution, premium gifts, luxury gifts, unique gifts, corporate gifts, bulk gifts, VAM Enterprises",
 };
 export default function Home() {
-  const router = useRouter();
-
   return (
       <main className="overflow-x-hidden">
         <Navbar/>
