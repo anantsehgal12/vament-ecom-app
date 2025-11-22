@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getProductById } from '@/lib/data/products';
-import { PrismaClient } from '@/lib/generated/prisma';
-
-const prisma = new PrismaClient();
+import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
 
 export async function GET(
   request: NextRequest,
@@ -27,8 +26,8 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const productId = params.id;
   try {
-    const productId = params.id;
     const body = await request.json();
     const { name, price, mrp, taxRate, description, categoryId, images, variants, isLive } = body;
 
@@ -46,67 +45,68 @@ export async function PUT(
       return NextResponse.json({ error: 'Category not found' }, { status: 400 });
     }
 
-    // First, delete existing images and variants
-    await prisma.image.deleteMany({
-      where: {
-        OR: [
-          {
-            variant: {
-              productId: productId,
+    // Use transaction for delete and update to ensure atomicity
+    const updatedProduct = await prisma.$transaction(
+      /** @type {import('@prisma/client').Prisma.TransactionClient} */
+      async (tx) => {
+        // Delete existing related images and variants
+        await tx.image.deleteMany({
+        where: {
+          OR: [
+            { variant: { productId } },
+            { productId },
+          ],
+        },
+      });
+
+      await tx.variant.deleteMany({
+        where: { productId },
+      });
+
+      // Update product with new data, images and variants
+      const product = await tx.product.update({
+        where: { id: productId },
+        data: {
+          name,
+          price,
+          mrp: mrp ? parseFloat(mrp) : null,
+          taxRate: parseFloat(taxRate) || 0,
+          description,
+          categoryId,
+          isLive: isLive !== undefined ? isLive : undefined,
+          images: {
+            create: images.map((image: any) => ({
+              src: image.src,
+              alt: image.alt,
+            })),
+          },
+          variants: {
+            create: variants.map((variant: any) => ({
+              name: variant.name,
+              images: {
+                create: variant.images.map((image: any) => ({
+                  src: image.src,
+                  alt: image.alt,
+                })),
+              },
+            })),
+          },
+        },
+        include: {
+          category: true,
+          variants: {
+            include: {
+              images: true,
             },
           },
-          {
-            productId: productId,
-          },
-        ],
-      },
+          images: true,
+        },
+      });
+
+      return product;
     });
 
-    await prisma.variant.deleteMany({
-      where: { productId },
-    });
-
-    // Update the product
-    const product = await prisma.product.update({
-      where: { id: productId },
-      data: {
-        name,
-        price,
-        mrp: mrp ? parseFloat(mrp) : null,
-        taxRate: parseFloat(taxRate) || 0,
-        description,
-        categoryId,
-        isLive: isLive !== undefined ? isLive : undefined,
-        images: {
-          create: images.map((image: any) => ({
-            src: image.src,
-            alt: image.alt,
-          })),
-        },
-        variants: {
-          create: variants.map((variant: any) => ({
-            name: variant.name,
-            images: {
-              create: variant.images.map((image: any) => ({
-                src: image.src,
-                alt: image.alt,
-              })),
-            },
-          })),
-        },
-      },
-      include: {
-        category: true,
-        variants: {
-          include: {
-            images: true,
-          },
-        },
-        images: true,
-      },
-    });
-
-    return NextResponse.json(product);
+    return NextResponse.json(updatedProduct);
   } catch (error) {
     console.error('Error updating product:', error);
     return NextResponse.json({ error: 'Failed to update product' }, { status: 500 });
