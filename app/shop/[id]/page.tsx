@@ -5,6 +5,25 @@ import { useEffect, useState } from 'react';
 import Navbar from '@/app/_components/Navbar';
 import AddToCartForm from '@/app/_components/AddToCartForm';
 import { ProductGallery } from '@/app/_components/ProductGallery';
+import { Metadata } from 'next';
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const productId = params.id;
+  const product = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${productId}`).then((res) => res.json());
+
+  if (!product) {
+    return {
+      title: "Product Not Found",
+      description: "The product you are looking for does not exist.",
+    };
+  }
+
+  return {
+    title: `${product.name} - VAM Enterprises`,
+    description: product.description,
+    keywords: [product.name, product.category.name, "VAM Enterprises", "premium gifts", "luxury gifts"],
+  };
+}
 
 
 interface Product {

@@ -3,7 +3,13 @@
 import Link from 'next/link'
 import Navbar from '../_components/Navbar'
 import { useEffect, useState } from 'react'
+import type { Metadata } from 'next';
 
+export const metadata: Metadata = {
+  title: "Shop All Products - VAM Enterprises",
+  description: "Explore the full range of exclusive and premium gifts from VAM Enterprises. From corporate gifting to personal presents, find the perfect item for any occasion.",
+  keywords: "shop, all products, VAM Enterprises, premium gifts, luxury gifts, corporate gifts, gifting solution",
+};
 
 interface Product {
   id: string
