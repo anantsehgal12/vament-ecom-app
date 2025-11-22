@@ -25,10 +25,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id: productId } = await params;
+    const productId = params.id;
     const body = await request.json();
     const { name, price, mrp, taxRate, description, categoryId, images, variants, isLive } = body;
 
@@ -115,10 +115,10 @@ export async function PUT(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id: productId } = await params;
+    const productId = params.id;
     const body = await request.json();
     const { stock, isLive } = body;
 
@@ -202,10 +202,10 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id: productId } = await params;
+    const productId = params.id;
 
     // Delete related records first (Images -> Variants -> Product)
     await prisma.image.deleteMany({
