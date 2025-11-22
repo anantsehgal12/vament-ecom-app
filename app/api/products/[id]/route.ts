@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getProductById } from '@/lib/data/products';
-import { PrismaClient } from '@prisma/client';
 import prisma from '@/lib/prisma';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } | Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const productId = params.id;
     const product = await getProductById(productId);
 
@@ -24,19 +24,18 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } | Promise<{ id: string }> }
 ) {
+  const params = await context.params;
   const productId = params.id;
   try {
     const body = await request.json();
     const { name, price, mrp, taxRate, description, categoryId, images, variants, isLive } = body;
 
-    // Validate categoryId
     if (!categoryId) {
       return NextResponse.json({ error: 'Category ID is required' }, { status: 400 });
     }
 
-    // Check if category exists
     const category = await prisma.category.findUnique({
       where: { id: categoryId },
     });
@@ -45,66 +44,62 @@ export async function PUT(
       return NextResponse.json({ error: 'Category not found' }, { status: 400 });
     }
 
-    // Use transaction for delete and update to ensure atomicity
     const updatedProduct = await prisma.$transaction(
-      /** @type {import('@prisma/client').Prisma.TransactionClient} */
-      async (tx) => {
-        // Delete existing related images and variants
+      async (tx: any) => {
         await tx.image.deleteMany({
-        where: {
-          OR: [
-            { variant: { productId } },
-            { productId },
-          ],
-        },
-      });
-
-      await tx.variant.deleteMany({
-        where: { productId },
-      });
-
-      // Update product with new data, images and variants
-      const product = await tx.product.update({
-        where: { id: productId },
-        data: {
-          name,
-          price,
-          mrp: mrp ? parseFloat(mrp) : null,
-          taxRate: parseFloat(taxRate) || 0,
-          description,
-          categoryId,
-          isLive: isLive !== undefined ? isLive : undefined,
-          images: {
-            create: images.map((image: any) => ({
-              src: image.src,
-              alt: image.alt,
-            })),
+          where: {
+            OR: [
+              { variant: { productId } },
+              { productId },
+            ],
           },
-          variants: {
-            create: variants.map((variant: any) => ({
-              name: variant.name,
-              images: {
-                create: variant.images.map((image: any) => ({
-                  src: image.src,
-                  alt: image.alt,
-                })),
-              },
-            })),
-          },
-        },
-        include: {
-          category: true,
-          variants: {
-            include: {
-              images: true,
+        });
+
+        await tx.variant.deleteMany({
+          where: { productId },
+        });
+
+        const product = await tx.product.update({
+          where: { id: productId },
+          data: {
+            name,
+            price,
+            mrp: mrp ? parseFloat(mrp) : null,
+            taxRate: parseFloat(taxRate) || 0,
+            description,
+            categoryId,
+            isLive: isLive !== undefined ? isLive : undefined,
+            images: {
+              create: images.map((image: any) => ({
+                src: image.src,
+                alt: image.alt,
+              })),
+            },
+            variants: {
+              create: variants.map((variant: any) => ({
+                name: variant.name,
+                images: {
+                  create: variant.images.map((image: any) => ({
+                    src: image.src,
+                    alt: image.alt,
+                  })),
+                },
+              })),
             },
           },
-          images: true,
-        },
-      });
+          include: {
+            category: true,
+            variants: {
+              include: {
+                images: true,
+              },
+            },
+            images: true,
+          },
+        });
 
-      return product;
-    });
+        return product;
+      });
 
     return NextResponse.json(updatedProduct);
   } catch (error) {
@@ -115,9 +110,10 @@ export async function PUT(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } | Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const productId = params.id;
     const body = await request.json();
     const { stock, isLive } = body;
@@ -139,12 +135,10 @@ export async function PATCH(
     if (stock !== undefined) updateData.stock = stock;
     if (isLive !== undefined) updateData.isLive = isLive;
 
-    // If stock is being set to 0, automatically set isLive to false
     if (stock === 0) {
       updateData.isLive = false;
     }
 
-    // If trying to set isLive to true but stock is 0, prevent it
     if (isLive === true) {
       const currentProduct = await prisma.product.findUnique({
         where: { id: productId },
@@ -169,7 +163,6 @@ export async function PATCH(
       },
     });
 
-    // Create notification for stock update
     if (oldProduct && stock !== undefined && oldProduct.stock !== stock) {
       let message = `Stock updated for ${product.name}: ${oldProduct.stock} → ${stock}`;
       if (stock === 0) {
@@ -183,7 +176,6 @@ export async function PATCH(
       });
     }
 
-    // Create notification for live status update
     if (oldProduct && isLive !== undefined && oldProduct.isLive !== isLive) {
       await prisma.notification.create({
         data: {
@@ -202,12 +194,12 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } | Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const productId = params.id;
 
-    // Delete related records first (Images -> Variants -> Product)
     await prisma.image.deleteMany({
       where: {
         OR: [
@@ -227,7 +219,6 @@ export async function DELETE(
       where: { productId },
     });
 
-    // Now delete the product
     await prisma.product.delete({
       where: { id: productId },
     });
