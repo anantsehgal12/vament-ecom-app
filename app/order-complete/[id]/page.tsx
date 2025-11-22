@@ -62,11 +62,6 @@ export default function OrderCompletePage() {
   const [isCancelling, setIsCancelling] = useState(false);
 
   useEffect(() => {
-    if (isLoaded && !user) {
-      router.push('/sign-in');
-      return;
-    }
-
     if (user && params.id) {
       fetchOrder();
     }
@@ -124,12 +119,12 @@ export default function OrderCompletePage() {
 
   if (!isLoaded || loading) {
     return (
-      <div>
-        <Navbar />
-        <div className="min-h-screen flex items-center justify-center text-white">
-          <div>Loading...</div>
+        <div>
+          <Navbar />
+          <div className="min-h-screen flex items-center justify-center text-white">
+            <div>Loading...</div>
+          </div>
         </div>
-      </div>
     );
   }
 
@@ -138,9 +133,9 @@ export default function OrderCompletePage() {
   }
 
   return (
-    <div>
-      <Navbar />
-      <div className="min-h-screen py-8">
+    <main>
+        <Navbar />
+        <div className="min-h-screen py-8">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center mb-8">
             <div className="text-green-400 text-4xl md:text-6xl mb-4">✓</div>
@@ -323,6 +318,6 @@ export default function OrderCompletePage() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

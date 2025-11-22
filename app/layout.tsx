@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
 import React from "react";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/sonner";
-import Lenis from "lenis"
+import Lenis from "lenis";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,6 +17,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const jetMono = JetBrains_Mono({
+  variable: "--font-jet-mono",
+  subsets: ["latin"],
+});
 
 export default function RootLayout({
   children,
@@ -44,7 +48,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased font-mono`}
+          className={`${geistSans.variable} ${geistMono.variable} ${jetMono.variable} antialiased font-jet-mono`}
         >
           {children}
           <Toaster />

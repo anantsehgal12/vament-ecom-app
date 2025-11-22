@@ -145,12 +145,12 @@ export default function OrdersPage() {
 
   if (!isLoaded || loading) {
     return (
-      <div>
-        <Navbar />
-        <div className="min-h-screen flex items-center justify-center text-white">
-          <div>Loading...</div>
+        <div>
+          <Navbar />
+          <div className="min-h-screen flex items-center justify-center text-white">
+            <div>Loading...</div>
+          </div>
         </div>
-      </div>
     );
   }
 
@@ -159,169 +159,169 @@ export default function OrdersPage() {
   }
 
   return (
-    <div>
-      <Navbar />
-      <div className="min-h-screen py-8">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <h1 className="text-2xl md:text-3xl font-bold text-white mb-6 md:mb-8">My Orders</h1>
+      <div>
+        <Navbar />
+        <div className="min-h-screen py-8">
+          <div className="container mx-auto px-4 max-w-6xl">
+            <h1 className="text-2xl md:text-3xl font-bold text-white mb-6 md:mb-8">My Orders</h1>
 
-          {orders.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-gray-200 text-lg mb-4">You haven't placed any orders yet</div>
-              <Button onClick={() => router.push('/shop')} className="rounded-3xl p-8 text-md">
-                Start Shopping
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {orders.map((order) => (
-                <Card key={order.id} className="bg-gray-800 border-gray-700">
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-white flex items-center space-x-4">
-                          <span>Order #{order.orderId}</span>
-                          <Badge className={`${getStatusColor(order.status)} text-white`}>
-                            {order.status}
-                          </Badge>
-                        </CardTitle>
-                        <p className="text-gray-300 text-sm mt-2">
-                          {new Date(order.createdAt).toLocaleString()}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-gray-300 text-sm">Total Amount</p>
-                        <p className="text-white text-xl font-bold">₹{order.totalAmount.toFixed(2)}</p>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {order.items.map((item) => (
-                        <div key={item.id} className="flex items-center space-x-4 p-4 bg-gray-700 rounded-lg">
-                          <div className="flex-shrink-0">
-                            {item.variant?.images?.[0] ? (
-                              <img
-                                src={item.variant.images[0].src}
-                                alt={item.variant.images[0].alt}
-                                className="w-16 h-16 object-cover rounded"
-                              />
-                            ) : item.product.variants?.[0]?.images?.[0] ? (
-                              <img
-                                src={item.product.variants[0].images[0].src}
-                                alt={item.product.variants[0].images[0].alt}
-                                className="w-16 h-16 object-cover rounded"
-                              />
-                            ) : (
-                              <div className="w-16 h-16 bg-gray-600 rounded flex items-center justify-center">
-                                <span className="text-gray-400 text-xs">No Image</span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-grow">
-                            <h3 className="text-white font-medium">{item.product.name}</h3>
-                            {item.variant?.name && (
-                              <p className="text-gray-300 text-sm">Variant: {item.variant.name}</p>
-                            )}
-                            <p className="text-gray-300 text-sm">Category: {item.product.category.name}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-white">Qty: {item.quantity}</p>
-                            <p className="text-white font-medium">₹{(item.price * item.quantity).toFixed(2)}</p>
-                          </div>
+            {orders.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-gray-200 text-lg mb-4">You haven't placed any orders yet</div>
+                <Button onClick={() => router.push('/shop')} className="rounded-3xl p-8 text-md">
+                  Start Shopping
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {orders.map((order) => (
+                  <Card key={order.id} className="bg-gray-800 border-gray-700">
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-white flex items-center space-x-4">
+                            <span>Order #{order.orderId}</span>
+                            <Badge className={`${getStatusColor(order.status)} text-white`}>
+                              {order.status}
+                            </Badge>
+                          </CardTitle>
+                          <p className="text-gray-300 text-sm mt-2">
+                            {new Date(order.createdAt).toLocaleString()}
+                          </p>
                         </div>
-                      ))}
-                    </div>
-                    <div className="mt-4 pt-4 border-t border-gray-600">
-                      <div className="flex justify-between items-center">
-                        <div className="flex space-x-2">
-                          <Button
-                            onClick={() => router.push(`/order-complete/${order.id}`)}
-                            variant="outline"
-                            className="border-gray-600 text-white hover:bg-gray-700"
-                          >
-                            View Order Details
-                          </Button>
-                          {order.status !== 'SHIPPED' && order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && (
+                        <div className="text-right">
+                          <p className="text-gray-300 text-sm">Total Amount</p>
+                          <p className="text-white text-xl font-bold">₹{order.totalAmount.toFixed(2)}</p>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {order.items.map((item) => (
+                          <div key={item.id} className="flex items-center space-x-4 p-4 bg-gray-700 rounded-lg">
+                            <div className="flex-shrink-0">
+                              {item.variant?.images?.[0] ? (
+                                <img
+                                  src={item.variant.images[0].src}
+                                  alt={item.variant.images[0].alt}
+                                  className="w-16 h-16 object-cover rounded"
+                                />
+                              ) : item.product.variants?.[0]?.images?.[0] ? (
+                                <img
+                                  src={item.product.variants[0].images[0].src}
+                                  alt={item.product.variants[0].images[0].alt}
+                                  className="w-16 h-16 object-cover rounded"
+                                />
+                              ) : (
+                                <div className="w-16 h-16 bg-gray-600 rounded flex items-center justify-center">
+                                  <span className="text-gray-400 text-xs">No Image</span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-grow">
+                              <h3 className="text-white font-medium">{item.product.name}</h3>
+                              {item.variant?.name && (
+                                <p className="text-gray-300 text-sm">Variant: {item.variant.name}</p>
+                              )}
+                              <p className="text-gray-300 text-sm">Category: {item.product.category.name}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-white">Qty: {item.quantity}</p>
+                              <p className="text-white font-medium">₹{(item.price * item.quantity).toFixed(2)}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-4 pt-4 border-t border-gray-600">
+                        <div className="flex justify-between items-center">
+                          <div className="flex space-x-2">
                             <Button
-                              onClick={() => openCancelDialog(order)}
-                              variant="destructive"
-                              size="sm"
+                              onClick={() => router.push(`/order-complete/${order.id}`)}
+                              variant="outline"
+                              className="border-gray-600 text-white hover:bg-gray-700"
                             >
-                              Cancel Order
+                              View Order Details
+                            </Button>
+                            {order.status !== 'SHIPPED' && order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && (
+                              <Button
+                                onClick={() => openCancelDialog(order)}
+                                variant="destructive"
+                                size="sm"
+                              >
+                                Cancel Order
+                              </Button>
+                            )}
+                          </div>
+                          {order.invoiceUrl && (
+                            <Button
+                              onClick={() => window.open(order.invoiceUrl, '_blank')}
+                              variant="outline"
+                              size="sm"
+                              className="border-gray-600 text-white hover:bg-gray-700"
+                            >
+                              View Invoice
                             </Button>
                           )}
                         </div>
-                        {order.invoiceUrl && (
-                          <Button
-                            onClick={() => window.open(order.invoiceUrl, '_blank')}
-                            variant="outline"
-                            size="sm"
-                            className="border-gray-600 text-white hover:bg-gray-700"
-                          >
-                            View Invoice
-                          </Button>
-                        )}
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
-        <DialogContent className="bg-gray-800 text-white border-gray-700">
-          <DialogHeader>
-            <DialogTitle>Cancel Order</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Reason for Cancellation</label>
-              <Select value={cancelReason} onValueChange={setCancelReason}>
-                <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                  <SelectValue placeholder="Select a reason" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-700 border-gray-600">
-                  {cancelReasons.map((reason) => (
-                    <SelectItem key={reason.value} value={reason.value}>
-                      {reason.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Additional Description (Optional)</label>
-              <Textarea
-                value={cancelDescription}
-                onChange={(e) => setCancelDescription(e.target.value)}
-                placeholder="Provide more details..."
-                className="bg-gray-700 border-gray-600 text-white"
-                rows={3}
-              />
-            </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setCancelDialogOpen(false)}
-              className="border-gray-600 text-white hover:bg-gray-700"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleCancelOrder}
-              disabled={!cancelReason || cancelling}
-              variant="destructive"
-            >
-              {cancelling ? 'Cancelling...' : 'Confirm Cancellation'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+        </div>
+
+        <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+          <DialogContent className="bg-gray-800 text-white border-gray-700">
+            <DialogHeader>
+              <DialogTitle>Cancel Order</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Reason for Cancellation</label>
+                <Select value={cancelReason} onValueChange={setCancelReason}>
+                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                    <SelectValue placeholder="Select a reason" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-700 border-gray-600">
+                    {cancelReasons.map((reason) => (
+                      <SelectItem key={reason.value} value={reason.value}>
+                        {reason.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Additional Description (Optional)</label>
+                <Textarea
+                  value={cancelDescription}
+                  onChange={(e) => setCancelDescription(e.target.value)}
+                  placeholder="Provide more details..."
+                  className="bg-gray-700 border-gray-600 text-white"
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setCancelDialogOpen(false)}
+                className="border-gray-600 text-white hover:bg-gray-700"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCancelOrder}
+                disabled={!cancelReason || cancelling}
+                variant="destructive"
+              >
+                {cancelling ? 'Cancelling...' : 'Confirm Cancellation'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
   );
 }

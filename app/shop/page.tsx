@@ -49,22 +49,23 @@ export default function ShopPage() {
 
   if (loading) {
     return (
-      <div>
-        <Navbar/>
-        <div className="mx-auto max-w-2xl px-4 py-5 sm:px-6 lg:max-w-7xl lg:px-8">
-          <h2 className="text-xl md:text-2xl font-bold text-center tracking-tight text-white">Products</h2>
-          <div className="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-6">
-            <div className="text-center text-white">Loading...</div>
+        <div>
+          <Navbar/>
+          <div className="mx-auto max-w-2xl px-4 py-5 sm:px-6 lg:max-w-7xl lg:px-8">
+            <h2 className="text-xl md:text-2xl font-bold text-center tracking-tight text-white">Products</h2>
+            <div className="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-6">
+              <div className="text-center text-white">Loading...</div>
+            </div>
           </div>
         </div>
-      </div>
+
     )
   }
 
   return (
-    <div>
-      <Navbar/>
-      <div className="mx-auto max-w-2xl px-4 py-5 sm:px-6 lg:max-w-7xl lg:px-8">
+    <main>
+        <Navbar/>
+        <div className="mx-auto max-w-2xl px-4 py-5 sm:px-6 lg:max-w-7xl lg:px-8">
         <h2 className="text-xl md:text-2xl font-bold text-center tracking-tight text-white">Products</h2>
 
         <div className="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-6">
@@ -100,6 +101,6 @@ export default function ShopPage() {
           ))}
         </div>
       </div>
-    </div>
+      </main>
   )
 }
