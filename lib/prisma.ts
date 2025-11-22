@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../lib/generated/prisma';
 
 declare global {
   // Allow global prisma to be reused in development to prevent exhausting DB connections
