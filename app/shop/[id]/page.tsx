@@ -5,7 +5,8 @@ import { useEffect, useState } from 'react';
 import Navbar from '@/app/_components/Navbar';
 import AddToCartForm from '@/app/_components/AddToCartForm';
 import { ProductGallery } from '@/app/_components/ProductGallery';
-import ProductClientPage from '../../_components/ProductClientPage';
+import YouMayAlsoLike from '@/app/_components/YouMayAlsoLike';
+import Footer from '@/app/_components/Footer';
 
 interface Product {
   id: string;
@@ -32,6 +33,7 @@ export default function ProductDetailPage() {
   const productId = params.id as string;
 
   const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -55,6 +57,23 @@ export default function ProductDetailPage() {
 
     getProduct();
   }, [productId]);
+
+  useEffect(() => {
+    if (product) {
+      const categoryId = product.category.id;
+      const currentProductId = product.id;
+      async function getRelatedProducts() {
+        try {
+          const res = await fetch(`/api/products?category=${categoryId}`);
+          const data = await res.json();
+          setRelatedProducts(data.filter((p: Product) => p.id !== currentProductId));
+        } catch (error) {
+          console.error('Error fetching related products:', error);
+        }
+      }
+      getRelatedProducts();
+    }
+  }, [product]);
 
   if (loading) {
     return (
@@ -193,6 +212,12 @@ export default function ProductDetailPage() {
               </div>
             </div>
           </div>
+          {relatedProducts.length > 0 && (
+            <div className="mx-auto mt-6 max-w-7xl px-4 sm:px-6 lg:px-8">
+              <YouMayAlsoLike products={relatedProducts} />
+            </div>
+          )}
+          <Footer />
         </div>
   );
 }
