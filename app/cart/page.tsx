@@ -46,17 +46,16 @@ export default function CartPage() {
   const router = useRouter();
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(true);
-
 const basePrice = Number(
-  (item?.product?.price || '0').replace(/[^\d.]/g, '')
-) || 0;
+    (item?.product?.price || '0').replace(/[^\d.]/g, '')
+  ) || 0;
 
-const taxRate = Number(item?.product?.taxRate) || 0;
-const quantity = Number(item?.quantity) || 1;
+  const taxRate = Number(item?.product?.taxRate) || 0;
+  const quantity = Number(item?.quantity) || 1;
 
-const totalPrice = Math.round(
-  basePrice * (1 + taxRate / 100) * quantity
-);
+  const totalPrice = Math.round(
+    basePrice * (1 + taxRate / 100) * quantity
+  );
   
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set());
 
