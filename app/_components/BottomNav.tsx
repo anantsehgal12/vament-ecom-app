@@ -60,7 +60,7 @@ function BottomNav() {
   ];
 
   return (
-        <div className="fixed bottom-0 left-0 z-50 w-full h-16 border-t bg-gray-700 border-gray-600 md:hidden rounded-3xl pl-2 pr-2">
+        <div className="fixed bottom-0 left-0 z-50 w-full h-16 border-t bg-popover border-gray-600 md:hidden rounded-3xl pl-2 pr-2">
           <div className="grid h-full max-w-lg grid-cols-4 mx-auto font-medium">
             {links.map((link) => (
             <button
