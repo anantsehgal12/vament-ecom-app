@@ -46,6 +46,18 @@ export default function CartPage() {
   const router = useRouter();
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(true);
+
+const basePrice = Number(
+  (item?.product?.price || '0').replace(/[^\d.]/g, '')
+) || 0;
+
+const taxRate = Number(item?.product?.taxRate) || 0;
+const quantity = Number(item?.quantity) || 1;
+
+const totalPrice = Math.round(
+  basePrice * (1 + taxRate / 100) * quantity
+);
+  
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -286,9 +298,7 @@ export default function CartPage() {
                               {/* Subtotal and Remove Button */}
                               <div className="flex flex-row md:flex-col items-center justify-between w-full md:w-auto md:items-end space-x-4 md:space-x-0 md:space-y-2">
                                 <p className="text-base md:text-lg font-semibold text-white">
-                                  ₹{Math.round(
-                                    (parseFloat(item.product.price.replace(/[^\\d.]/g, '')) + (parseFloat(item.product.price.replace(/[^\\d.]/g, '')) * item.product.taxRate / 100)) * item.quantity
-                                  )}
+                                  ₹{totalPrice}
                                 </p>
                                 <Button
                                   variant="ghost"
