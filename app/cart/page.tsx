@@ -33,7 +33,6 @@ interface CartItem {
     name: string | null;
     images: { src: string; alt: string }[];
   };
-        
 }
 
 interface Cart {
@@ -46,17 +45,6 @@ export default function CartPage() {
   const router = useRouter();
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(true);
-  const basePrice = Number(
-  (product?.price || '0').replace(/[^\d.]/g, '')
-) || 0;
-
-const taxRate = Number(product?.taxRate) || 0;
-const quantity = Number(product?.quantity) || 1;
-
-const totalPrice = Math.round(
-  basePrice * (1 + taxRate / 100) * quantity
-);
-  
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -134,14 +122,19 @@ const totalPrice = Math.round(
     }
   };
 
+  // Helper function to calculate item total with tax
+  const calculateItemTotal = (item: CartItem): number => {
+    const price = parseFloat(item.product.price.replace(/[^\d.]/g, ''));
+    const taxAmount = price * (item.product.taxRate / 100);
+    const finalPrice = price + taxAmount;
+    return Math.round(finalPrice * item.quantity);
+  };
+
   const calculateTotal = () => {
     if (!cart?.items) return 0;
 
     return cart.items.reduce((total: number, item: CartItem) => {
-      const price = parseFloat(item.product.price.replace(/[^\\d.]/g, ''));
-      const taxAmount = price * (item.product.taxRate / 100);
-      const finalPrice = price + taxAmount;
-      return total + (finalPrice * item.quantity);
+      return total + calculateItemTotal(item);
     }, 0);
   };
 
@@ -149,7 +142,7 @@ const totalPrice = Math.round(
     if (!cart?.items) return 0;
 
     return cart.items.reduce((total: number, item: CartItem) => {
-      const price = parseFloat(item.product.price.replace(/[^\\d.]/g, ''));
+      const price = parseFloat(item.product.price.replace(/[^\d.]/g, ''));
       return total + (price * item.quantity);
     }, 0);
   };
@@ -158,7 +151,7 @@ const totalPrice = Math.round(
     if (!cart?.items) return 0;
 
     return cart.items.reduce((total: number, item: CartItem) => {
-      const price = parseFloat(item.product.price.replace(/[^\\d.]/g, ''));
+      const price = parseFloat(item.product.price.replace(/[^\d.]/g, ''));
       const taxAmount = price * (item.product.taxRate / 100);
       return total + (taxAmount * item.quantity);
     }, 0);
@@ -211,9 +204,10 @@ const totalPrice = Math.round(
                     {cart.items.map((item: CartItem, index: number) => {
                       const image = getItemImage(item);
                       const isUpdating = updatingItems.has(item.id);
+                      const itemTotal = calculateItemTotal(item);
 
                       return (
-                        <motion.div key={item.id} variants={{hidden:{opacity:0, y:20}, visible:{opacity:1, y:0}}}>\
+                        <motion.div key={item.id} variants={{hidden:{opacity:0, y:20}, visible:{opacity:1, y:0}}}>
                         <Card className="overflow-hidden bg-gray-800 border-gray-700">
                           <CardContent className="p-4 md:p-6">
                             <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4">
@@ -248,7 +242,7 @@ const totalPrice = Math.round(
                                 <div className="mt-1">
                                   <p className="text-base md:text-lg font-semibold text-white">
                                     ₹{Math.round(
-                                      parseFloat(item.product.price.replace(/[^\\d.]/g, '')) + (parseFloat(item.product.price.replace(/[^\\d.]/g, '')) * item.product.taxRate / 100)
+                                      parseFloat(item.product.price.replace(/[^\d.]/g, '')) + (parseFloat(item.product.price.replace(/[^\d.]/g, '')) * item.product.taxRate / 100)
                                     ).toString()}
                                   </p>
                                   {item.product.mrp && (
@@ -297,7 +291,7 @@ const totalPrice = Math.round(
                               {/* Subtotal and Remove Button */}
                               <div className="flex flex-row md:flex-col items-center justify-between w-full md:w-auto md:items-end space-x-4 md:space-x-0 md:space-y-2">
                                 <p className="text-base md:text-lg font-semibold text-white">
-                                  ₹{totalPrice}
+                                  ₹{itemTotal}
                                 </p>
                                 <Button
                                   variant="ghost"
@@ -342,7 +336,10 @@ const totalPrice = Math.round(
                           <span>Total:</span>
                           <span>₹{Math.round(calculateTotal())}</span>
                         </div>
-                        <div className="flex-col space-y-4 space-x-4 pt-4">
+                        <div className='text-sm text-gray-300 text-center'>
+                          <h2>Shipping and other charges would be calculated at the checkout</h2>
+                        </div>
+                        <div className="flex-col space-y-2 space-x-4 pt-4">
                           <Button
                             variant="outline"
                             className="w-full border-gray-600 text-white hover:bg-gray-700"
@@ -372,3 +369,4 @@ const totalPrice = Math.round(
       </div>
   );
 }
+
